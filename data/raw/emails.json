@@ -1,0 +1,26 @@
+[
+  {
+    "id": "email_001",
+    "from": "ahmed.benali@alpenblick.com",
+    "to": "ceo@alpenblick.com",
+    "subject": "Project X Status Update",
+    "timestamp": "2026-06-25T10:00:00",
+    "body": "Wanted to flag that Project X is delayed by 3 days due to legacy system issues. Team A is working on a fix."
+  },
+  {
+    "id": "email_002",
+    "from": "sarah.miller@alpenblick.com",
+    "to": "ahmed.benali@alpenblick.com",
+    "subject": "Re: Project X Status Update",
+    "timestamp": "2026-06-25T11:30:00",
+    "body": "Confirmed. Escalated to IT. Worst case we lose one full sprint. Will keep you posted."
+  },
+  {
+    "id": "email_003",
+    "from": "cfo@alpenblick.com",
+    "to": "marco.rossi@alpenblick.com",
+    "subject": "Project Y Budget Approved",
+    "timestamp": "2026-06-24T09:00:00",
+    "body": "Pleased to confirm the budget for Project Y has been approved. Please proceed with the next phase."
+  }
+]

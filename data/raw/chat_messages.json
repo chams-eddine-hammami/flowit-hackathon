@@ -1,0 +1,47 @@
+[
+  {
+    "id": "msg_001",
+    "platform": "teams",
+    "channel": "project-x",
+    "sender": "ahmed.benali",
+    "sender_email": "ahmed.benali@alpenblick.com",
+    "timestamp": "2026-06-25T09:15:00",
+    "content": "Just finished the sprint review for Project X. Team is behind on the API integration by 3 days."
+  },
+  {
+    "id": "msg_002",
+    "platform": "teams",
+    "channel": "project-x",
+    "sender": "sarah.miller",
+    "sender_email": "sarah.miller@alpenblick.com",
+    "timestamp": "2026-06-25T09:20:00",
+    "content": "The delay is due to the legacy system not exposing the right endpoints. Raised it with IT."
+  },
+  {
+    "id": "msg_003",
+    "platform": "teams",
+    "channel": "general",
+    "sender": "marco.rossi",
+    "sender_email": "marco.rossi@alpenblick.com",
+    "timestamp": "2026-06-26T11:00:00",
+    "content": "Team morale is quite low this week. Multiple people mentioned feeling overloaded."
+  },
+  {
+    "id": "msg_004",
+    "platform": "teams",
+    "channel": "project-y",
+    "sender": "ahmed.benali",
+    "sender_email": "ahmed.benali@alpenblick.com",
+    "timestamp": "2026-06-27T14:30:00",
+    "content": "Project Y is on track. Budget approved by CFO last Friday."
+  },
+  {
+    "id": "msg_005",
+    "platform": "teams",
+    "channel": "project-x",
+    "sender": "sarah.miller",
+    "sender_email": "sarah.miller@alpenblick.com",
+    "timestamp": "2026-06-28T10:00:00",
+    "content": "IT confirmed the legacy API fix will take another week. Project X deadline is at serious risk."
+  }
+]

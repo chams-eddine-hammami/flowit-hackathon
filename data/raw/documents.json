@@ -1,0 +1,16 @@
+[
+  {
+    "id": "doc_001",
+    "title": "Project X Kickoff Decision",
+    "author": "ahmed.benali@alpenblick.com",
+    "created_at": "2026-06-01T09:00:00",
+    "content": "Project X was officially kicked off on June 1st. Owner: Ahmed Ben Ali. Team: Lucerne Operations. Budget: 50000 EUR. Expected delivery: July 15th 2026."
+  },
+  {
+    "id": "doc_002",
+    "title": "Team Quarterly Review",
+    "author": "marco.rossi@alpenblick.com",
+    "created_at": "2026-06-15T14:00:00",
+    "content": "Lucerne Operations completed 3 projects in Q2. Current workload is high. Sentiment survey shows 6.2 out of 10. Recommend reducing scope of Project X to protect team wellbeing."
+  }
+]
