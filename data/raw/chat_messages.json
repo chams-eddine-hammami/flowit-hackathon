@@ -2,20 +2,20 @@
   {
     "id": "msg_001",
     "platform": "teams",
-    "channel": "project-x",
+    "channel": "lucerne-ops",
     "sender": "ahmed.benali",
     "sender_email": "ahmed.benali@alpenblick.com",
     "timestamp": "2026-06-25T09:15:00",
-    "content": "Just finished the sprint review for Project X. Team is behind on the API integration by 3 days."
+    "content": "Just finished the sprint review for the Lucerne Guest Experience Initiative. Team is behind on the check-in system integration by 3 days."
   },
   {
     "id": "msg_002",
     "platform": "teams",
-    "channel": "project-x",
+    "channel": "lucerne-ops",
     "sender": "sarah.miller",
     "sender_email": "sarah.miller@alpenblick.com",
     "timestamp": "2026-06-25T09:20:00",
-    "content": "The delay is due to the legacy system not exposing the right endpoints. Raised it with IT."
+    "content": "The delay is due to the legacy hotel management system not exposing the right endpoints. Raised it with IT."
   },
   {
     "id": "msg_003",
@@ -24,24 +24,24 @@
     "sender": "marco.rossi",
     "sender_email": "marco.rossi@alpenblick.com",
     "timestamp": "2026-06-26T11:00:00",
-    "content": "Team morale is quite low this week. Multiple people mentioned feeling overloaded."
+    "content": "Team morale in Lucerne Operations is quite low this week. Multiple people mentioned feeling overloaded with the new guest-facing services rollout."
   },
   {
     "id": "msg_004",
     "platform": "teams",
-    "channel": "project-y",
+    "channel": "freiburg-ops",
     "sender": "ahmed.benali",
     "sender_email": "ahmed.benali@alpenblick.com",
     "timestamp": "2026-06-27T14:30:00",
-    "content": "Project Y is on track. Budget approved by CFO last Friday."
+    "content": "Freiburg Panorama Resort renovation is on track. Budget approved by CFO last Friday."
   },
   {
     "id": "msg_005",
     "platform": "teams",
-    "channel": "project-x",
+    "channel": "lucerne-ops",
     "sender": "sarah.miller",
     "sender_email": "sarah.miller@alpenblick.com",
     "timestamp": "2026-06-28T10:00:00",
-    "content": "IT confirmed the legacy API fix will take another week. Project X deadline is at serious risk."
+    "content": "IT confirmed the legacy hotel system fix will take another week. Lucerne Guest Experience Initiative deadline is at serious risk."
   }
 ]
