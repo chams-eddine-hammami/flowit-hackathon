@@ -1,12 +1,14 @@
 # Query Engine
 # Executive asks a question — Claude finds the answer with evidence
 # Searches ALL sources — chat, email, documents, surveys
+# Governance applied — role permissions enforced before AI sees data
 
 import anthropic
 import json
 import os
 from dotenv import load_dotenv
 from normalization.database import get_connection
+from governance.access_control import filter_results_by_role, get_allowed_sources
 
 load_dotenv()
 
@@ -30,7 +32,7 @@ def ask_claude(question: str, context_docs: list) -> dict:
             "author": doc['author_email'],
             "date": str(doc['timestamp']),
             "type": doc['source_type'],
-            "preview": doc['content'][:100]
+            "preview": doc['content'][:150]
         })
 
     prompt = f"""You are an intelligent executive assistant for Alpenblick Hospitality.
@@ -77,8 +79,9 @@ Respond ONLY with valid JSON — no markdown:
         }
 
 
-def query(question: str) -> dict:
+def query(question: str, role: str = "CEO — Full Access") -> dict:
     print(f"\n🔍 Searching for: {question}")
+    print(f"🔐 Role: {role}")
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -94,7 +97,7 @@ def query(question: str) -> dict:
 
     if not conditions:
         return {
-            "answer": "Question too short.",
+            "answer": "Question too short to search.",
             "confidence": "low",
             "key_finding": "No keywords found",
             "action_needed": None,
@@ -104,7 +107,7 @@ def query(question: str) -> dict:
 
     where_clause = " OR ".join(conditions)
 
-    # Step 1 — Search unstructured first (chat, email, docs)
+    # Step 1 — Search unstructured (chat, email, docs)
     cursor.execute(f"""
         SELECT
             r.id, r.source_system, r.source_type,
@@ -143,9 +146,23 @@ def query(question: str) -> dict:
     # Combine — unstructured first then surveys
     all_results = list(unstructured) + list(surveys)
 
-    print(f"📚 Found {len(unstructured)} operational docs + {len(surveys)} survey responses")
+    # ── GOVERNANCE — filter by role ──────────────────────────
+    filtered_results = filter_results_by_role(all_results, role)
 
-    if not all_results:
+    # If results exist but ALL blocked by governance
+    if not filtered_results and all_results:
+        return {
+            "answer": "🔒 Access denied. You do not have permission to view this information.",
+            "confidence": "high",
+            "key_finding": "This content is restricted for your role.",
+            "action_needed": "Contact your administrator if you need access.",
+            "uncertainty": None,
+            "evidence": [],
+            "access_denied": True
+        }
+
+    # If nothing found at all
+    if not filtered_results:
         return {
             "answer": "No relevant information found in any source.",
             "confidence": "low",
@@ -155,7 +172,10 @@ def query(question: str) -> dict:
             "evidence": []
         }
 
-    result = ask_claude(question, all_results)
+    print(f"📚 Found {len(list(unstructured))} operational docs + {len(list(surveys))} survey responses")
+    print(f"✅ After governance filter: {len(filtered_results)} documents allowed for this role")
+
+    result = ask_claude(question, filtered_results)
     return result
 
 
@@ -163,14 +183,11 @@ def run_test_queries():
     """10 executive questions covering all data sources."""
 
     questions = [
-        # Operations questions — from chat/email/docs
         "What is the status of the Lucerne Guest Experience Initiative?",
         "How is morale in Lucerne Operations team?",
         "What did the CFO decide about the Freiburg budget?",
         "Who owns the Lucerne Guest Experience Initiative?",
         "What is causing the delay in the Lucerne project?",
-
-        # Survey questions — from Benny's real data
         "How satisfied are employees with their current role?",
         "What are the main reasons employees are leaving the company?",
         "How do employees rate their work life balance?",
