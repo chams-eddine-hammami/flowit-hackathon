@@ -1,16 +1,37 @@
 [
   {
     "id": "doc_001",
-    "title": "Lucerne Guest Experience Initiative Kickoff",
-    "author": "ahmed.benali@alpenblick.com",
+    "title": "Lucerne Guest Experience Initiative — Project Kickoff",
+    "author": "respondent_668738@alpenblick.com",
     "created_at": "2026-06-01T09:00:00",
-    "content": "The Lucerne Guest Experience Initiative was officially kicked off on June 1st. Owner: Ahmed Ben Ali. Team: Lucerne Operations. Budget: 50000 EUR. Expected delivery: July 15th 2026. Goal: modernize check-in system and guest-facing services at Lucerne Grand Hotel."
+    "content": "Project: Lucerne Guest Experience Initiative. Owner: respondent_668738. Team: Lucerne Operations at Lucerne Grand Hotel. Budget: 50,000 EUR. Start: June 1st 2026. Delivery: July 15th 2026. Objective: Modernize check-in system and guest-facing digital services. Key risk: Legacy hotel management system API integration dependency."
   },
   {
     "id": "doc_002",
-    "title": "Lucerne Operations Quarterly Review",
-    "author": "marco.rossi@alpenblick.com",
+    "title": "Lucerne Operations — Q2 Team Review",
+    "author": "respondent_668736@alpenblick.com",
     "created_at": "2026-06-15T14:00:00",
-    "content": "Lucerne Operations completed 3 projects in Q2. Current workload is high. Sentiment survey shows 6.2 out of 10. Team morale is declining due to overload. Recommend reducing scope of the Guest Experience Initiative to protect team wellbeing."
+    "content": "Team: Lucerne Operations. Review period: Q2 2026. Projects completed: 3. Sentiment score: 6.2 out of 10 — declining. Main concerns: high workload, lack of career development, insufficient HR support. Authors: respondent_668736, respondent_668737, respondent_668738. Recommendation: Reduce scope of Guest Experience Initiative to protect team wellbeing."
+  },
+  {
+    "id": "doc_003",
+    "title": "Freiburg Panorama Resort — Renovation Project Brief",
+    "author": "respondent_668734@alpenblick.com",
+    "created_at": "2026-05-01T09:00:00",
+    "content": "Project: Freiburg Panorama Resort Renovation. Owner: respondent_668734. Team: Freiburg Operations. Budget: 250,000 EUR — approved by CFO June 24th 2026. Status: On Track. Team morale: High. Next phase: Interior renovation of guest rooms and lobby."
+  },
+  {
+    "id": "doc_004",
+    "title": "HR Strategy 2026 — Career Development Initiative",
+    "author": "respondent_668735@alpenblick.com",
+    "created_at": "2026-04-01T09:00:00",
+    "content": "HR Priority 2026: Address career development gap. Survey data shows career development is top concern across all Alpenblick teams and languages. Action plan: Create internal career pathways, launch training program by Q3, partner with hotel management institutes, introduce mentoring for junior staff. Owner: respondent_668735. Budget requested: 30,000 EUR."
+  },
+  {
+    "id": "doc_005",
+    "title": "Legacy System — Technical Assessment",
+    "author": "respondent_668737@alpenblick.com",
+    "created_at": "2026-06-10T09:00:00",
+    "content": "Assessment: Legacy Hotel Management System Oracle HMS 2014. Issues: API endpoints not exposed for modern integration. Estimated fix: 1-2 weeks. Risk to Lucerne Guest Experience Initiative: HIGH — deadline at risk. Recommendation: Parallel track — API wrapper development while IT fixes legacy system. Owner: respondent_668737."
   }
 ]

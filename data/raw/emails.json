@@ -1,26 +1,42 @@
 [
   {
     "id": "email_001",
-    "from": "ahmed.benali@alpenblick.com",
+    "from": "respondent_668738@alpenblick.com",
     "to": "ceo@alpenblick.com",
-    "subject": "Lucerne Guest Experience Initiative — Status Update",
+    "subject": "URGENT — Lucerne Guest Experience Initiative at Risk",
     "timestamp": "2026-06-25T10:00:00",
-    "body": "Wanted to flag that the Lucerne Guest Experience Initiative is delayed by 3 days due to legacy hotel management system issues. Lucerne Operations team is working on a fix."
+    "body": "Dear CEO, the Lucerne Guest Experience Initiative is currently delayed by 3 days due to the legacy hotel management system failing to expose the correct API endpoints. Lucerne Operations team is working with IT on a fix. Will keep you updated."
   },
   {
     "id": "email_002",
-    "from": "sarah.miller@alpenblick.com",
-    "to": "ahmed.benali@alpenblick.com",
-    "subject": "Re: Lucerne Guest Experience Initiative — Status Update",
+    "from": "respondent_668737@alpenblick.com",
+    "to": "respondent_668738@alpenblick.com",
+    "subject": "Re: URGENT — Lucerne Guest Experience Initiative at Risk",
     "timestamp": "2026-06-25T11:30:00",
-    "body": "Confirmed. Escalated to IT. Worst case we lose one full sprint. The Lucerne Operations team is under pressure. Will keep you posted."
+    "body": "Confirmed. IT escalation in progress. Worst case is losing one full sprint. Team morale is low — people are asking about the deadline. I recommend executive direction by end of week."
   },
   {
     "id": "email_003",
     "from": "cfo@alpenblick.com",
-    "to": "marco.rossi@alpenblick.com",
-    "subject": "Freiburg Panorama Resort Renovation Budget Approved",
+    "to": "respondent_668734@alpenblick.com",
+    "subject": "Freiburg Panorama Resort Renovation — Budget Approved",
     "timestamp": "2026-06-24T09:00:00",
-    "body": "Pleased to confirm the budget for the Freiburg Panorama Resort renovation has been approved. Please proceed with the next phase."
+    "body": "Dear colleague, I am pleased to confirm that the budget for the Freiburg Panorama Resort renovation has been formally approved by the board. Total approved amount is 250,000 EUR. Please proceed with the next phase immediately."
+  },
+  {
+    "id": "email_004",
+    "from": "respondent_668735@alpenblick.com",
+    "to": "ceo@alpenblick.com",
+    "subject": "HR Alert — Resignation Pattern in Lucerne Operations",
+    "timestamp": "2026-06-29T09:00:00",
+    "body": "Dear CEO, we received 2 resignation letters from Lucerne Operations this week. Both employees cited overwork and lack of internal career development as primary reasons. This aligns with exit survey data showing career development as the top concern across all teams. I recommend we urgently review our L&D program and workload distribution."
+  },
+  {
+    "id": "email_005",
+    "from": "respondent_668736@alpenblick.com",
+    "to": "ceo@alpenblick.com",
+    "subject": "Q2 Operations Report — Lucerne and Freiburg",
+    "timestamp": "2026-06-15T14:00:00",
+    "body": "Dear CEO, Q2 operations summary: Lucerne Grand Hotel completed 3 projects. Current team sentiment is 6.2 out of 10 — below target. Main concerns are workload and career growth. Freiburg Panorama Resort renovation is progressing well — budget approved and team motivated. Recommend immediate action on Lucerne team morale before Q3."
   }
 ]

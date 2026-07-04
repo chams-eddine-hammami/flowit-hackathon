@@ -2,46 +2,64 @@
   {
     "id": "msg_001",
     "platform": "teams",
-    "channel": "lucerne-ops",
-    "sender": "ahmed.benali",
-    "sender_email": "ahmed.benali@alpenblick.com",
+    "channel": "lucerne-operations",
+    "sender": "respondent_668738",
+    "sender_email": "respondent_668738@alpenblick.com",
     "timestamp": "2026-06-25T09:15:00",
-    "content": "Just finished the sprint review for the Lucerne Guest Experience Initiative. Team is behind on the check-in system integration by 3 days."
+    "content": "Team — just wrapped the sprint review for the Lucerne Guest Experience Initiative. We are 3 days behind on the check-in system integration. Legacy hotel management system is not exposing the right API endpoints. IT is aware."
   },
   {
     "id": "msg_002",
     "platform": "teams",
-    "channel": "lucerne-ops",
-    "sender": "sarah.miller",
-    "sender_email": "sarah.miller@alpenblick.com",
-    "timestamp": "2026-06-25T09:20:00",
-    "content": "The delay is due to the legacy hotel management system not exposing the right endpoints. Raised it with IT."
+    "channel": "lucerne-operations",
+    "sender": "respondent_668737",
+    "sender_email": "respondent_668737@alpenblick.com",
+    "timestamp": "2026-06-25T09:45:00",
+    "content": "Confirmed. I escalated to IT this morning. They need to investigate the legacy system first. Worst case we lose a full sprint. Will keep everyone updated."
   },
   {
     "id": "msg_003",
     "platform": "teams",
     "channel": "general",
-    "sender": "marco.rossi",
-    "sender_email": "marco.rossi@alpenblick.com",
+    "sender": "respondent_668736",
+    "sender_email": "respondent_668736@alpenblick.com",
     "timestamp": "2026-06-26T11:00:00",
-    "content": "Team morale in Lucerne Operations is quite low this week. Multiple people mentioned feeling overloaded with the new guest-facing services rollout."
+    "content": "Flagging for leadership — morale in Lucerne Operations is quite low this week. Multiple people feel overloaded with the guest-facing services rollout on top of the check-in system delays. We need to consider reducing scope."
   },
   {
     "id": "msg_004",
     "platform": "teams",
-    "channel": "freiburg-ops",
-    "sender": "ahmed.benali",
-    "sender_email": "ahmed.benali@alpenblick.com",
+    "channel": "freiburg-operations",
+    "sender": "respondent_668734",
+    "sender_email": "respondent_668734@alpenblick.com",
     "timestamp": "2026-06-27T14:30:00",
-    "content": "Freiburg Panorama Resort renovation is on track. Budget approved by CFO last Friday."
+    "content": "Good news — Freiburg Panorama Resort renovation is on track. CFO approved the full budget last Friday. Team is motivated and ready for next phase. No blockers at this stage."
   },
   {
     "id": "msg_005",
     "platform": "teams",
-    "channel": "lucerne-ops",
-    "sender": "sarah.miller",
-    "sender_email": "sarah.miller@alpenblick.com",
+    "channel": "lucerne-operations",
+    "sender": "respondent_668737",
+    "sender_email": "respondent_668737@alpenblick.com",
     "timestamp": "2026-06-28T10:00:00",
-    "content": "IT confirmed the legacy hotel system fix will take another week. Lucerne Guest Experience Initiative deadline is at serious risk."
+    "content": "IT update — the legacy hotel management system fix will take another full week minimum. This puts the Lucerne Guest Experience Initiative deadline at serious risk. We need executive decision on whether to extend or reduce scope."
+  },
+  {
+    "id": "msg_006",
+    "platform": "teams",
+    "channel": "hr-team",
+    "sender": "respondent_668735",
+    "sender_email": "respondent_668735@alpenblick.com",
+    "timestamp": "2026-06-29T08:30:00",
+    "content": "HR update — 2 resignation letters received from Lucerne Operations this week. Both cited workload and lack of career development opportunities. This matches our exit survey patterns. Action needed urgently."
+  },
+  {
+    "id": "msg_007",
+    "platform": "teams",
+    "channel": "freiburg-guest-facing",
+    "sender": "respondent_668733",
+    "sender_email": "respondent_668733@alpenblick.com",
+    "timestamp": "2026-06-30T09:00:00",
+    "content": "Freiburg Guest-Facing Services team update — we completed onboarding of 3 new staff this week. Guest satisfaction scores are up 0.4 points this month. Team morale is positive. No issues to report."
   }
 ]

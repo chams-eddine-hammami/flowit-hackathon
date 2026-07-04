@@ -59,15 +59,17 @@ def create_legacy_system():
 
     # Insert legacy employee data
     employees = [
-        (1001, 'Ahmed', 'Ben Ali', 'ahmed.benali@alpenblick.com',
-         'LUC_OPS', 'Lucerne Operations', 'Project Lead', '2019-03-01', 'ACT'),
-        (1002, 'Sarah', 'Miller', 'sarah.miller@alpenblick.com',
-         'LUC_OPS', 'Lucerne Operations', 'IT Liaison', '2020-06-15', 'ACT'),
-        (1003, 'Marco', 'Rossi', 'marco.rossi@alpenblick.com',
-         'LUC_OPS', 'Lucerne Operations', 'Operations Manager', '2018-01-10', 'ACT'),
-        (1004, 'Anna', 'Schmidt', 'cfo@alpenblick.com',
-         'FIN', 'Finance', 'CFO', '2015-09-01', 'ACT'),
-    ]
+    (1001, 'Respondent', '668738', 'respondent_668738@alpenblick.com',
+     'LUC_OPS', 'Lucerne Operations', 'Project Lead - Guest Experience Initiative', '2019-03-01', 'ACT'),
+    (1002, 'Respondent', '668737', 'respondent_668737@alpenblick.com',
+     'LUC_OPS', 'Lucerne Operations', 'IT Liaison', '2020-06-15', 'ACT'),
+    (1003, 'Respondent', '668736', 'respondent_668736@alpenblick.com',
+     'LUC_OPS', 'Lucerne Operations', 'Operations Manager', '2018-01-10', 'ACT'),
+    (1004, 'Respondent', '668735', 'respondent_668735@alpenblick.com',
+     'HR', 'Human Resources', 'HR Director', '2018-05-01', 'ACT'),
+    (1005, 'CFO', 'Alpenblick', 'cfo@alpenblick.com',
+     'FIN', 'Finance', 'Chief Financial Officer', '2015-09-01', 'ACT'),
+]
 
     cursor.executemany("""
         INSERT OR REPLACE INTO EMPLOYEES

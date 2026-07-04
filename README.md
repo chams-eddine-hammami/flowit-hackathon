@@ -181,6 +181,27 @@ streamlit run interface/app.py
 - Fine-tuned model on company vocabulary
 - Push notifications when sentiment drops
 
+
+## What I Would Build Next
+
+- **Vector search** (Pinecone / Weaviate) — replace keyword search with
+  semantic similarity for better document retrieval. Currently we send
+  the 15 most keyword-relevant documents to Claude. Vector search would
+  send the 15 most semantically similar — significantly improving answer
+  quality especially for multilingual content.
+
+- **Real-time streaming** (Apache Kafka) — replace batch pipeline with
+  live data ingestion for instant sentiment alerts.
+
+- **More connectors** — Jira, Salesforce, SAP, SharePoint API.
+
+- **Feedback loop** — executive rates answers → system learns what
+  is useful → improves over time.
+
+- **Fine-tuned model** — train on company-specific vocabulary for
+  better entity recognition.
+  
+
 ---
 
 ## Build Log
