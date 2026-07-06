@@ -47,7 +47,12 @@ class SurveyConnector(BaseConnector):
                 "author_email": f"respondent_{row['respondent_id']}@alpenblick.com",
                 "author_name": f"respondent_{row['respondent_id']}",
                 "timestamp": str(row.get("answer_submission_start", "")),
-                "content": f"Q: {row['question_text']} | A: {row['answer']}",
+                "content": (
+    f"Q: {row['question_text']} | "
+    f"Score: {row['answer']} out of 7 | Type: numeric rating scale 1-7"
+    if row.get('question_type') == 'range_slider'
+    else f"Q: {row['question_text']} | A: {row['answer']}"
+),
                 "metadata": {
                     "questionnaire": row.get("questionnaire_title", ""),
                     "question_type": row.get("question_type", ""),
