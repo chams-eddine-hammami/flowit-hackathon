@@ -98,15 +98,65 @@ def run_pipeline():
     survey_stored = store_documents(survey_normalized)
     print(f"✅ Survey: {survey_stored} new records stored")
 
-    # --- SUMMARY ---
+        # --- CONNECTOR 5: Slack ---
+    print("\n💬 Running Slack Connector...")
+    from connectors.slack_connector import SlackConnector
+    slack = SlackConnector("data/raw/slack_messages.json")
+    slack.connect()
+    slack_raw = slack.extract()
+    slack_valid = slack.validate(slack_raw)
+    slack_normalized = slack.send(slack_valid)
+    slack_stored = store_documents(slack_normalized)
+    print(f"✅ Slack: {slack_stored} new records stored")
+
+    # --- CONNECTOR 6: SharePoint ---
+    print("\n🗂️ Running SharePoint Connector...")
+    from connectors.sharepoint_connector import SharePointConnector
+    sp = SharePointConnector("data/raw/sharepoint_files.json")
+    sp.connect()
+    sp_raw = sp.extract()
+    sp_valid = sp.validate(sp_raw)
+    sp_normalized = sp.send(sp_valid)
+    sp_stored = store_documents(sp_normalized)
+    print(f"✅ SharePoint: {sp_stored} new records stored")
+
+    # --- CONNECTOR 7: Jira ---
+    print("\n📋 Running Jira Connector...")
+    from connectors.jira_connector import JiraConnector
+    jira = JiraConnector("data/raw/jira_tickets.json")
+    jira.connect()
+    jira_raw = jira.extract()
+    jira_valid = jira.validate(jira_raw)
+    jira_normalized = jira.send(jira_valid)
+    jira_stored = store_documents(jira_normalized)
+    print(f"✅ Jira: {jira_stored} new records stored")
+
+    # --- CONNECTOR 8: Meeting Notes ---
+    print("\n📝 Running Meeting Notes Connector...")
+    from connectors.meeting_notes_connector import MeetingNotesConnector
+    meetings = MeetingNotesConnector("data/raw/meeting_notes.json")
+    meetings.connect()
+    meetings_raw = meetings.extract()
+    meetings_valid = meetings.validate(meetings_raw)
+    meetings_normalized = meetings.send(meetings_valid)
+    meetings_stored = store_documents(meetings_normalized)
+    print(f"✅ Meeting Notes: {meetings_stored} new records stored")
+
+    # --- UPDATED SUMMARY ---
     print("\n" + "=" * 50)
     print("📊 PIPELINE SUMMARY:")
-    total = chat_stored + email_stored + doc_stored + survey_stored
-    print(f"  Chat messages : {chat_stored}")
-    print(f"  Emails        : {email_stored}")
-    print(f"  Documents     : {doc_stored}")
-    print(f"  Survey rows   : {survey_stored}")
-    print(f"  TOTAL stored  : {total}")
+    total = (chat_stored + email_stored + doc_stored +
+             survey_stored + slack_stored + sp_stored +
+             jira_stored + meetings_stored)
+    print(f"  Chat messages    : {chat_stored}")
+    print(f"  Emails           : {email_stored}")
+    print(f"  Documents        : {doc_stored}")
+    print(f"  Survey responses : {survey_stored}")
+    print(f"  Slack messages   : {slack_stored}")
+    print(f"  SharePoint files : {sp_stored}")
+    print(f"  Jira tickets     : {jira_stored}")
+    print(f"  Meeting notes    : {meetings_stored}")
+    print(f"  TOTAL stored     : {total}")
     print("=" * 50)
     print("✅ Pipeline complete!")
 

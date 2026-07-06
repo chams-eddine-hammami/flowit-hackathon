@@ -23,7 +23,11 @@ st.set_page_config(
 # ─── STYLING ─────────────────────────────────────────────────
 st.markdown("""
 <style>
-    .main { max-width: 480px; margin: 0 auto; padding: 0 10px; }
+    .block-container {
+        max-width: 500px !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
     .stTextInput input {
         border-radius: 25px;
         padding: 12px 20px;
@@ -85,6 +89,14 @@ st.markdown("""
         background: #fee2e2;
         padding: 3px 10px;
         border-radius: 12px;
+    }
+    .stInfo {
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+    }
+    .streamlit-expanderHeader {
+        font-size: 13px !important;
+        color: #2563EB !important;
     }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -174,20 +186,32 @@ def process_question(question: str):
 
 
 # ─── EVIDENCE CARD ────────────────────────────────────────────
-def render_evidence_card(e: dict):
+def render_evidence_card(e: dict, number: int):
+    """Clean professional evidence card with number."""
+
+    source_label = {
+        'chat_messaging': 'Chat Message',
+        'email': 'Email',
+        'document': 'Document',
+        'survey': 'Employee Survey',
+        'jira_tickets': 'Jira Ticket',
+        'slack_chat': 'Slack Message',
+        'sharepoint_files': 'SharePoint File',
+        'meeting_notes': 'Meeting Notes',
+        'legacy_hr_system': 'HR System Record'
+    }.get(e['source'], e['type'].replace('_', ' ').title())
+
     source_emoji = {
         'chat_messaging': '💬',
         'email': '📧',
         'document': '📄',
-        'survey': '📊'
-    }.get(e['type'], '📌')
-
-    source_label = {
-        'chat_messaging': 'Teams / Chat Message',
-        'email': 'Email',
-        'document': 'Document',
-        'survey': 'Alpenblick Survey Data'
-    }.get(e['type'], 'Unknown Source')
+        'survey': '📊',
+        'jira_tickets': '🎫',
+        'slack_chat': '💬',
+        'sharepoint_files': '🗂️',
+        'meeting_notes': '📝',
+        'legacy_hr_system': '🏢'
+    }.get(e['source'], '📌')
 
     author_display = (
         e['author']
@@ -197,37 +221,69 @@ def render_evidence_card(e: dict):
     date_display = str(e['date'])[:10]
     content = e.get('preview', '')
 
-    # Parse Q and A for survey
+    # Clean content — remove technical suffixes
     if 'Q:' in content and '| A:' in content:
         parts = content.split('| A:')
         question_part = parts[0].replace('Q:', '').strip()
+        if '| Score:' in question_part:
+            question_part = question_part.split('| Score:')[0].strip()
         answer_part = parts[1].strip() if len(parts) > 1 else content
+        if '| Type:' in answer_part:
+            answer_part = answer_part.split('| Type:')[0].strip()
+        if '| Score:' in answer_part:
+            answer_part = answer_part.split('| Score:')[0].strip()
     else:
         question_part = None
         answer_part = content
 
-    # Header line
+    # Evidence header
+    st.markdown(f"""
+    <div style='background:#f8fafc; border-radius:10px;
+                padding:12px 14px; margin:12px 0 6px 0;
+                border-left:4px solid #2563EB;'>
+        <p style='margin:0 0 4px 0; font-size:13px;
+                  font-weight:700; color:#2563EB;'>
+            📌 Evidence #{number}
+        </p>
+        <p style='margin:0; font-size:12px; color:#64748b; line-height:1.8;'>
+            {source_emoji} <strong>Source:</strong> {source_label}<br>
+            📅 <strong>Date:</strong> {date_display}<br>
+            👤 <strong>From:</strong> {author_display}
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Question if exists
+    if question_part:
+        st.markdown(
+            f"<p style='color:#64748b; font-size:12px; "
+            f"font-style:italic; margin:4px 0 6px 8px;'>"
+            f"❓ {question_part}</p>",
+            unsafe_allow_html=True
+        )
+
+    # Answer
     st.markdown(
-        f"**{source_emoji} {source_label}**"
-        f"&nbsp;&nbsp;📅 `{date_display}`"
-        f"&nbsp;&nbsp;👤 `{author_display}`",
+        f"<div style='background:white; border-radius:8px; "
+        f"padding:10px 14px; margin:0 0 8px 0; "
+        f"border:1px solid #e2e8f0;'>"
+        f"<p style='margin:0; color:#1e293b; font-size:13px; "
+        f"line-height:1.7;'>{answer_part}</p>"
+        f"</div>",
         unsafe_allow_html=True
     )
 
-    # Question
-    if question_part:
-        st.markdown(f"> ❓ *{question_part}*")
-
-    # Answer — full text
-    st.markdown("💬 **They said:**")
-    st.info(answer_part)
-
-    # English translation if available
+    # Translation
     translation = e.get('translation')
     if translation:
-        st.success(f"🇬🇧 **English translation:** {translation}")
-
-    st.markdown("---")
+        st.markdown(
+            f"<div style='background:#f0fdf4; border-radius:8px; "
+            f"padding:8px 14px; margin:0 0 8px 0;'>"
+            f"<p style='margin:0; color:#166534; font-size:12px;'>"
+            f"🇬🇧 <strong>English:</strong> {translation}</p>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
 
 
 # ─── CHAT PAGE ────────────────────────────────────────────────
@@ -260,7 +316,7 @@ def show_chat():
     source_labels = {
         'chat_messaging': '💬 Chat',
         'email': '📧 Email',
-        'document': '📄 Documents',
+        'document': '📄 Docs',
         'survey': '📊 Surveys'
     }
     access_text = " · ".join([source_labels.get(s, s) for s in allowed])
@@ -281,7 +337,7 @@ def show_chat():
             "What is the status of the Lucerne initiative?",
             "How is morale in Lucerne Operations?",
             "Why are employees leaving?",
-            "What did the CFO decide about Freiburg?",
+            "What is the average satisfaction score?",
             "What do employees think about career development?"
         ]
         for suggestion in suggestions:
@@ -292,6 +348,7 @@ def show_chat():
 
     # Chat history
     for chat in st.session_state.chat_history:
+        # User bubble
         st.markdown(
             f"<div class='user-bubble'>{chat['question']}</div>",
             unsafe_allow_html=True
@@ -301,20 +358,25 @@ def show_chat():
         confidence = result.get('confidence', 'low')
         badge_class = f"badge-{confidence}"
 
+        # Answer bubble
         st.markdown(
             f"<div class='assistant-bubble'>{result['answer']}</div>",
             unsafe_allow_html=True
         )
 
+        # Key finding
         if result.get('key_finding'):
             st.markdown(f"""
             <div class='answer-card'>
                 ⚡ <strong>Key finding:</strong> {result['key_finding']}
                 <br><br>
-                <span class='{badge_class}'>● {confidence.upper()} CONFIDENCE</span>
+                <span class='{badge_class}'>
+                    ● {confidence.upper()} CONFIDENCE
+                </span>
             </div>
             """, unsafe_allow_html=True)
 
+        # Action needed
         if result.get('action_needed'):
             st.markdown(f"""
             <div style='background:#fff7ed; border-left:4px solid #f97316;
@@ -324,6 +386,7 @@ def show_chat():
             </div>
             """, unsafe_allow_html=True)
 
+        # Uncertainty
         if result.get('uncertainty'):
             st.markdown(f"""
             <div style='background:#fafafa; border-radius:8px;
@@ -334,12 +397,14 @@ def show_chat():
             </div>
             """, unsafe_allow_html=True)
 
+        # Evidence — smart display
         if result.get('evidence'):
+            evidence_list = result['evidence']
             with st.expander(
-                f"📎 View evidence ({len(result['evidence'])} sources)"
+                f"📎 View evidence ({len(evidence_list)} sources)"
             ):
-                for ev in result['evidence']:
-                    render_evidence_card(ev)
+                for idx, ev in enumerate(evidence_list):
+                    render_evidence_card(ev, idx + 1)
 
         st.divider()
 

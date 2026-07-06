@@ -1,0 +1,26 @@
+[
+  {
+    "id": "sp_001",
+    "title": "Alpenblick Employee Handbook 2026",
+    "author": "respondent_668735@alpenblick.com",
+    "created_at": "2026-01-15T09:00:00",
+    "site": "HR SharePoint",
+    "content": "Employee handbook covering all Alpenblick Hospitality policies. Career development policy updated January 2026: all employees are entitled to 5 training days per year. Internal promotion policy: all positions must be advertised internally first. Performance review cycle: bi-annual in June and December."
+  },
+  {
+    "id": "sp_002",
+    "title": "Lucerne Guest Experience Initiative — Technical Spec",
+    "author": "respondent_668737@alpenblick.com",
+    "created_at": "2026-06-05T09:00:00",
+    "site": "IT SharePoint",
+    "content": "Technical specification for Lucerne check-in system modernization. Current system: Oracle HMS 2014 — end of life. New system: Cloud-based PMS with API integration. Key blocker: legacy Oracle HMS does not support REST API without custom wrapper. Estimated wrapper development: 2 weeks. Owner: respondent_668737."
+  },
+  {
+    "id": "sp_003",
+    "title": "Q2 2026 Survey Results Summary",
+    "author": "respondent_668735@alpenblick.com",
+    "created_at": "2026-06-30T09:00:00",
+    "site": "HR SharePoint",
+    "content": "Q2 2026 Survey Results. Participants: 22 employees across Lucerne and Freiburg teams. Key findings: Training support lowest score at 3.8/7. Career growth concern across all teams. Manager ratings positive at 5.8/7. Recommendation: urgent investment in L&D program. Next survey: Q3 opens July 7th 2026."
+  }
+]

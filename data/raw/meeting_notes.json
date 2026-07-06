@@ -1,0 +1,26 @@
+[
+  {
+    "id": "meeting_001",
+    "title": "Leadership Weekly — June 25th 2026",
+    "author": "respondent_668736@alpenblick.com",
+    "created_at": "2026-06-25T15:00:00",
+    "attendees": ["respondent_668738", "respondent_668736", "respondent_668735", "cfo"],
+    "content": "Meeting: Leadership Weekly June 25th 2026. Attendees: respondent_668738, respondent_668736, respondent_668735, CFO. Key decisions: 1. Lucerne Guest Experience Initiative deadline extended to July 31st pending IT fix. 2. CFO approved emergency budget of 5,000 EUR for legacy system fix. 3. HR to launch career development program by Q3. 4. All team leads to complete morale check-in with their teams this week."
+  },
+  {
+    "id": "meeting_002",
+    "title": "IT Emergency Call — June 28th 2026",
+    "author": "respondent_668737@alpenblick.com",
+    "created_at": "2026-06-28T11:00:00",
+    "attendees": ["respondent_668737", "respondent_668738"],
+    "content": "Emergency IT call June 28th 2026. Attendees: respondent_668737, respondent_668738. Decision: API wrapper development to start immediately. Estimated completion: July 5th 2026. Risk: if wrapper fails testing — full deadline extension to August required. Action: respondent_668737 to provide daily updates to respondent_668738."
+  },
+  {
+    "id": "meeting_003",
+    "title": "HR Review — Resignation Analysis June 29th",
+    "author": "respondent_668735@alpenblick.com",
+    "created_at": "2026-06-29T10:00:00",
+    "attendees": ["respondent_668735", "respondent_668736"],
+    "content": "HR Review June 29th 2026. Topic: resignation pattern analysis. Finding: 2 resignations from Lucerne Operations both citing career development and workload. Survey data confirms pattern — training support 3.8/7 and career growth 4.0/7 are two lowest scores. Decision: fast-track HR-301 ticket. Budget approved. Target: internal career pathways ready before Q3 performance reviews."
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "slack_001",
+    "platform": "slack",
+    "channel": "lucerne-team",
+    "sender": "respondent_668738",
+    "sender_email": "respondent_668738@alpenblick.com",
+    "timestamp": "2026-06-25T10:30:00",
+    "content": "Quick update on guest experience scores — we hit 4.2 this week which is below our 5.0 target. The check-in delays are directly impacting scores. Legacy system issue must be resolved urgently."
+  },
+  {
+    "id": "slack_002",
+    "platform": "slack",
+    "channel": "hr-updates",
+    "sender": "respondent_668735",
+    "sender_email": "respondent_668735@alpenblick.com",
+    "timestamp": "2026-06-26T09:00:00",
+    "content": "Survey results are in — training support scored only 3.8 out of 7 across all teams. This is our lowest score. We need immediate action on L&D program before Q3 performance reviews."
+  },
+  {
+    "id": "slack_003",
+    "platform": "slack",
+    "channel": "freiburg-team",
+    "sender": "respondent_668734",
+    "sender_email": "respondent_668734@alpenblick.com",
+    "timestamp": "2026-06-27T11:00:00",
+    "content": "Freiburg renovation update — Phase 1 complete. Guest rooms on floors 2 and 3 fully renovated. Team morale is high. On track to finish by December 2026."
+  },
+  {
+    "id": "slack_004",
+    "platform": "slack",
+    "channel": "all-hands",
+    "sender": "respondent_668736",
+    "sender_email": "respondent_668736@alpenblick.com",
+    "timestamp": "2026-06-28T08:00:00",
+    "content": "Reminder — Q3 survey opens Monday. Please complete it by Friday. Last quarter only 22 out of 38 employees responded. We need better participation to get accurate data."
+  },
+  {
+    "id": "slack_005",
+    "platform": "slack",
+    "channel": "lucerne-team",
+    "sender": "respondent_668737",
+    "sender_email": "respondent_668737@alpenblick.com",
+    "timestamp": "2026-06-29T14:00:00",
+    "content": "IT confirmed — legacy system API wrapper ready for testing. If tests pass this week — Lucerne Guest Experience Initiative can resume. Deadline might still be achievable if we work weekends."
+  }
+]

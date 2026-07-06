@@ -1,0 +1,54 @@
+[
+  {
+    "id": "jira_001",
+    "ticket_id": "ALPS-101",
+    "project": "Lucerne Guest Experience Initiative",
+    "title": "Legacy HMS API Integration",
+    "status": "IN PROGRESS",
+    "priority": "CRITICAL",
+    "assignee": "respondent_668737@alpenblick.com",
+    "reporter": "respondent_668738@alpenblick.com",
+    "created_at": "2026-06-10T09:00:00",
+    "updated_at": "2026-06-28T10:00:00",
+    "content": "Ticket ALPS-101: Legacy HMS API Integration. Status: IN PROGRESS. Priority: CRITICAL. Assignee: respondent_668737. Description: Oracle HMS 2014 does not expose REST endpoints required for new check-in system. Custom API wrapper must be built. Blocking: entire Lucerne Guest Experience Initiative. Est completion: July 5th 2026."
+  },
+  {
+    "id": "jira_002",
+    "ticket_id": "ALPS-102",
+    "project": "Lucerne Guest Experience Initiative",
+    "title": "New Check-in System UI Development",
+    "status": "BLOCKED",
+    "priority": "HIGH",
+    "assignee": "respondent_668738@alpenblick.com",
+    "reporter": "respondent_668738@alpenblick.com",
+    "created_at": "2026-06-12T09:00:00",
+    "updated_at": "2026-06-25T09:00:00",
+    "content": "Ticket ALPS-102: New Check-in System UI. Status: BLOCKED by ALPS-101. Priority: HIGH. Assignee: respondent_668738. Description: Frontend development for guest check-in interface. Cannot proceed until legacy API wrapper is complete. Original deadline: July 1st 2026. Current deadline: at risk."
+  },
+  {
+    "id": "jira_003",
+    "ticket_id": "FRBS-201",
+    "project": "Freiburg Panorama Resort Renovation",
+    "title": "Phase 1 — Guest Room Renovation Complete",
+    "status": "DONE",
+    "priority": "HIGH",
+    "assignee": "respondent_668734@alpenblick.com",
+    "reporter": "respondent_668734@alpenblick.com",
+    "created_at": "2026-05-01T09:00:00",
+    "updated_at": "2026-06-27T09:00:00",
+    "content": "Ticket FRBS-201: Phase 1 Renovation Complete. Status: DONE. Project: Freiburg Panorama Resort. Floors 2 and 3 guest rooms fully renovated. Budget used: 85,000 EUR of 250,000 EUR total. Phase 2 starting July 2026: lobby and restaurant renovation."
+  },
+  {
+    "id": "jira_004",
+    "ticket_id": "HR-301",
+    "project": "HR L&D Program 2026",
+    "title": "Career Development Program Launch",
+    "status": "TO DO",
+    "priority": "HIGH",
+    "assignee": "respondent_668735@alpenblick.com",
+    "reporter": "respondent_668735@alpenblick.com",
+    "created_at": "2026-06-29T09:00:00",
+    "updated_at": "2026-06-29T09:00:00",
+    "content": "Ticket HR-301: Career Development Program Launch. Status: TO DO. Priority: HIGH. Owner: respondent_668735. Description: Launch internal career pathways program following survey results showing career growth at 4.0/7 — lowest after training support. Target: program ready by Q3 2026. Budget: 30,000 EUR requested."
+  }
+]
