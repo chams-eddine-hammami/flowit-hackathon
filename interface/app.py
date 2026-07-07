@@ -1,10 +1,11 @@
 # Flowit Intelligence Platform
 # Mobile-first executive chat interface
-# Built with Streamlit — runs in phone browser
 
 import streamlit as st
 import sys
 import os
+import base64
+from pathlib import Path
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -12,48 +13,58 @@ from ai_layer.query_engine import query
 from governance.access_control import get_allowed_sources
 from governance.audit_log import init_audit_table, log_access
 
-# ─── PAGE CONFIG ─────────────────────────────────────────────
 st.set_page_config(
-    page_title="Flowit Intelligence",
-    page_icon="🏨",
+    page_title="flowit AI",
+    page_icon="✦",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# ─── STYLING ─────────────────────────────────────────────────
 st.markdown("""
 <style>
+    .stApp { background: #f0f4f8; }
     .block-container {
-        max-width: 500px !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
+        max-width: 420px !important;
+        padding: 0.5rem 1rem !important;
     }
+    /* Input */
     .stTextInput input {
-        border-radius: 25px;
-        padding: 12px 20px;
-        font-size: 16px;
-        border: 2px solid #e0e0e0;
+        background: white !important;
+        border: 1.5px solid #d1d5db !important;
+        color: #111827 !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+        font-size: 15px !important;
     }
+    .stTextInput input::placeholder { color: #9ca3af !important; }
+    /* Select */
+    .stSelectbox > div > div {
+        background: white !important;
+        border: 1.5px solid #d1d5db !important;
+        border-radius: 10px !important;
+        color: #111827 !important;
+    }
+    /* ALL Buttons */
     .stButton button {
-        border-radius: 25px;
-        background-color: #2563EB;
-        color: white;
-        font-size: 16px;
-        padding: 10px 24px;
-        border: none;
-        width: 100%;
+        background: #1a3a6b !important;
+        color: white !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        border: none !important;
+        width: 100% !important;
     }
-    .stButton button:hover { background-color: #1d4ed8; }
-    .answer-card {
-        background: #f0f7ff;
-        border-left: 4px solid #2563EB;
-        border-radius: 12px;
-        padding: 16px;
-        margin: 10px 0;
-        color: #1a1a1a;
+    .stButton button:hover {
+        background: #142d54 !important;
+        color: white !important;
     }
+    /* Labels */
+    label { color: #374151 !important; font-size: 13px !important; }
+    /* Divider */
+    hr { border-color: #d1d5db !important; margin: 12px 0 !important; }
+    /* Chat bubbles */
     .user-bubble {
-        background: #2563EB;
+        background: #1a3a6b;
         color: white;
         border-radius: 18px 18px 4px 18px;
         padding: 12px 16px;
@@ -62,42 +73,99 @@ st.markdown("""
         font-size: 15px;
     }
     .assistant-bubble {
-        background: #f0f0f0;
-        color: #1a1a1a;
+        background: white;
+        color: #111827;
         border-radius: 18px 18px 18px 4px;
         padding: 12px 16px;
         margin: 8px 0;
         font-size: 15px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .answer-card {
+        background: #eff6ff;
+        border-left: 4px solid #1a3a6b;
+        border-radius: 10px;
+        padding: 16px;
+        margin: 10px 0;
+        color: #111827;
     }
     .badge-high {
-        color: #16a34a !important;
-        font-weight: bold;
+        color: #166534 !important;
+        font-weight: 700;
         background: #dcfce7;
-        padding: 3px 10px;
-        border-radius: 12px;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 12px;
     }
     .badge-medium {
-        color: #d97706 !important;
-        font-weight: bold;
+        color: #92400e !important;
+        font-weight: 700;
         background: #fef3c7;
-        padding: 3px 10px;
-        border-radius: 12px;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 12px;
     }
     .badge-low {
-        color: #dc2626 !important;
-        font-weight: bold;
+        color: #991b1b !important;
+        font-weight: 700;
         background: #fee2e2;
-        padding: 3px 10px;
-        border-radius: 12px;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 12px;
     }
-    .stInfo {
-        font-size: 14px !important;
-        line-height: 1.6 !important;
+    /* Spinner */
+    .stSpinner > div { border-top-color: #1a3a6b !important; }
+    /* Expander */
+    .streamlit-expanderHeader {
+        background: white !important;
+        color: #374151 !important;
+        border-radius: 8px !important;
+        border: 1px solid #e5e7eb !important;
+    }
+    /* Evidence cards */
+    .evidence-header {
+        background: white;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin: 10px 0 6px 0;
+        border-left: 4px solid #1a3a6b;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+     /* Expander header — dark text */
+    .streamlit-expanderHeader p {
+        color: #111827 !important;
+        font-weight: 600 !important;
     }
     .streamlit-expanderHeader {
-        font-size: 13px !important;
-        color: #2563EB !important;
+        color: #111827 !important;
+        background: white !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 8px !important;
     }
+    details summary {
+        color: #111827 !important;
+    }
+    details summary p {
+        color: #111827 !important;
+    }
+    [data-testid="stExpander"] summary {
+        color: #111827 !important;
+        background: white !important;
+    }
+    [data-testid="stExpander"] summary span {
+        color: #111827 !important;
+    }
+            
+    /* Spinner text — dark */
+    .stSpinner p {
+        color: #111827 !important;
+        font-weight: 500 !important;
+    }
+    div[data-testid="stSpinner"] p {
+        color: #111827 !important;
+    }
+            
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
@@ -115,22 +183,42 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 
+# ─── LOGO ─────────────────────────────────────────────────────
+def get_logo():
+    logo_path = Path("interface/flowit_logo.jpeg")
+    if logo_path.exists():
+        with open(logo_path, "rb") as f:
+            data = base64.b64encode(f.read()).decode()
+        return (
+            f'<img src="data:image/jpeg;base64,{data}" '
+            f'style="width:52px; height:52px; border-radius:10px; '
+            f'margin-bottom:10px; object-fit:contain;">'
+        )
+    return '<div style="font-size:40px; margin-bottom:10px;">✦</div>'
+
+
 # ─── LOGIN ────────────────────────────────────────────────────
 def show_login():
-    st.markdown("""
-    <div style='text-align:center; padding:20px 0 10px 0;
-                border-bottom:1px solid #e0e0e0; margin-bottom:20px;'>
-        <h1>🏨 Flowit Intelligence</h1>
-        <p style='color:#666; font-size:14px;'>
-            Connected intelligence for Alpenblick Hospitality
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    logo_html = get_logo()
+    st.markdown(f"""
+    <div style='text-align:center; padding:20px 0 16px 0;'>
+        {logo_html}
+        <h1 style='font-size:24px; font-weight:700;
+                   color:#1a3a6b; margin:0 0 6px 0;'>
+            flowit AI
+        </h1>
+        <p style='color:#6b7280; font-size:13px; margin:0;'>
+            Connected intelligence from your people data
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### Welcome back")
-    st.markdown("Sign in to access your intelligence dashboard.")
+    st.markdown("---")
 
-    name = st.text_input("Your name", placeholder="e.g. Sarah Miller")
+    name = st.text_input("Full name", placeholder="e.g. Anna Schmidt")
+
     role = st.selectbox("Your role", [
         "Select your role...",
         "CEO — Full Access",
@@ -138,6 +226,8 @@ def show_login():
         "HR Manager — People & Surveys",
         "Operations Manager — Teams & Projects"
     ])
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
     if st.button("Sign In →"):
         if name and role != "Select your role...":
@@ -147,6 +237,12 @@ def show_login():
             st.rerun()
         else:
             st.error("Please enter your name and select your role.")
+
+    st.markdown("""
+    <p style='text-align:center; color:#9ca3af; font-size:11px; margin-top:28px;'>
+        🔒 Privacy-first · Swiss-made · Powered by Flowit AI
+    </p>
+    """, unsafe_allow_html=True)
 
 
 # ─── PROCESS QUESTION ─────────────────────────────────────────
@@ -167,7 +263,7 @@ def process_question(question: str):
         })
         return
 
-    with st.spinner("Searching all sources..."):
+    with st.spinner("🔍 Searching all sources..."):
         result = query(question, role=st.session_state.role)
 
     sources = [e['type'] for e in result.get('evidence', [])]
@@ -187,8 +283,6 @@ def process_question(question: str):
 
 # ─── EVIDENCE CARD ────────────────────────────────────────────
 def render_evidence_card(e: dict, number: int):
-    """Clean professional evidence card with number."""
-
     source_label = {
         'chat_messaging': 'Chat Message',
         'email': 'Email',
@@ -221,31 +315,38 @@ def render_evidence_card(e: dict, number: int):
     date_display = str(e['date'])[:10]
     content = e.get('preview', '')
 
-    # Clean content — remove technical suffixes
-    if 'Q:' in content and '| A:' in content:
+    score_value = None
+    question_part = None
+    answer_part = content
+
+    if 'Q:' in content and 'Score:' in content and 'out of 7' in content:
+        try:
+            question_part = content.split('|')[0].replace('Q:', '').strip()
+            score_str = content.split('Score:')[1].split('out of 7')[0].strip()
+            score_value = float(score_str)
+            answer_part = None
+        except:
+            pass
+    elif 'Q:' in content and '| A:' in content:
         parts = content.split('| A:')
         question_part = parts[0].replace('Q:', '').strip()
-        if '| Score:' in question_part:
-            question_part = question_part.split('| Score:')[0].strip()
         answer_part = parts[1].strip() if len(parts) > 1 else content
         if '| Type:' in answer_part:
             answer_part = answer_part.split('| Type:')[0].strip()
         if '| Score:' in answer_part:
             answer_part = answer_part.split('| Score:')[0].strip()
-    else:
-        question_part = None
-        answer_part = content
 
     # Evidence header
     st.markdown(f"""
-    <div style='background:#f8fafc; border-radius:10px;
-                padding:12px 14px; margin:12px 0 6px 0;
-                border-left:4px solid #2563EB;'>
-        <p style='margin:0 0 4px 0; font-size:13px;
-                  font-weight:700; color:#2563EB;'>
+    <div style='background:white; border-radius:10px;
+                padding:12px 14px; margin:10px 0 4px 0;
+                border-left:4px solid #1a3a6b;
+                box-shadow:0 1px 4px rgba(0,0,0,0.08);'>
+        <p style='margin:0 0 4px 0; font-size:12px;
+                  font-weight:700; color:#1a3a6b;'>
             📌 Evidence #{number}
         </p>
-        <p style='margin:0; font-size:12px; color:#64748b; line-height:1.8;'>
+        <p style='margin:0; font-size:12px; color:#4b5563; line-height:1.8;'>
             {source_emoji} <strong>Source:</strong> {source_label}<br>
             📅 <strong>Date:</strong> {date_display}<br>
             👤 <strong>From:</strong> {author_display}
@@ -253,32 +354,63 @@ def render_evidence_card(e: dict, number: int):
     </div>
     """, unsafe_allow_html=True)
 
-    # Question if exists
-    if question_part:
+    # Score display
+    if score_value is not None and question_part:
+        score_color = (
+            "#16a34a" if score_value >= 5
+            else "#d97706" if score_value >= 3
+            else "#dc2626"
+        )
+        score_pct = round((score_value / 7) * 100)
+        st.markdown(f"""
+        <div style='background:#f9fafb; border-radius:8px;
+                    padding:12px 14px; margin:0 0 8px 0;
+                    border:1px solid #e5e7eb;'>
+            <p style='margin:0 0 4px 0; color:#6b7280;
+                      font-size:12px; font-style:italic;'>
+                ❓ {question_part}
+            </p>
+            <p style='margin:0 0 8px 0; color:#111827; font-size:14px;'>
+                {author_display} rated
+                <strong style='color:{score_color}; font-size:22px;'>
+                {score_value:.0f}
+                </strong>
+                <span style='color:#6b7280;'> out of 7</span>
+            </p>
+            <div style='background:#e5e7eb; border-radius:10px; height:6px;'>
+                <div style='background:{score_color}; width:{score_pct}%;
+                            height:6px; border-radius:10px;'></div>
+            </div>
+            <p style='margin:3px 0 0 0; font-size:11px; color:#9ca3af;'>
+                {score_pct}% of maximum
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    elif answer_part:
+        if question_part:
+            st.markdown(
+                f"<p style='color:#6b7280; font-size:12px; "
+                f"font-style:italic; margin:4px 0 4px 0;'>"
+                f"❓ {question_part}</p>",
+                unsafe_allow_html=True
+            )
         st.markdown(
-            f"<p style='color:#64748b; font-size:12px; "
-            f"font-style:italic; margin:4px 0 6px 8px;'>"
-            f"❓ {question_part}</p>",
+            f"<div style='background:#f9fafb; border-radius:8px; "
+            f"padding:10px 14px; margin:0 0 8px 0; "
+            f"border:1px solid #e5e7eb;'>"
+            f"<p style='margin:0; color:#111827; font-size:13px; "
+            f"line-height:1.7;'>{answer_part}</p>"
+            f"</div>",
             unsafe_allow_html=True
         )
 
-    # Answer
-    st.markdown(
-        f"<div style='background:white; border-radius:8px; "
-        f"padding:10px 14px; margin:0 0 8px 0; "
-        f"border:1px solid #e2e8f0;'>"
-        f"<p style='margin:0; color:#1e293b; font-size:13px; "
-        f"line-height:1.7;'>{answer_part}</p>"
-        f"</div>",
-        unsafe_allow_html=True
-    )
-
-    # Translation
     translation = e.get('translation')
     if translation:
         st.markdown(
             f"<div style='background:#f0fdf4; border-radius:8px; "
-            f"padding:8px 14px; margin:0 0 8px 0;'>"
+            f"padding:8px 14px; margin:0 0 8px 0; "
+            f"border:1px solid #bbf7d0;'>"
             f"<p style='margin:0; color:#166534; font-size:12px;'>"
             f"🇬🇧 <strong>English:</strong> {translation}</p>"
             f"</div>",
@@ -296,17 +428,18 @@ def show_chat():
     }
     emoji = role_emoji.get(st.session_state.role, "👤")
 
-    col1, col2 = st.columns([4, 1])
+    col1, col2 = st.columns([5, 1])
     with col1:
         st.markdown(f"""
-        <div style='padding:10px 0;'>
-            <strong>🏨 Flowit Intelligence</strong><br>
-            <small style='color:#666;'>{emoji} {st.session_state.name}
-            · {st.session_state.role}</small>
+        <div style='padding:8px 0;'>
+            <strong style='color:#1a3a6b; font-size:16px;'>✦ flowit AI</strong><br>
+            <small style='color:#6b7280; font-size:12px;'>
+                {emoji} {st.session_state.name} · {st.session_state.role}
+            </small>
         </div>
         """, unsafe_allow_html=True)
     with col2:
-        if st.button("Sign out"):
+        if st.button("↩"):
             st.session_state.logged_in = False
             st.session_state.chat_history = []
             st.rerun()
@@ -314,41 +447,76 @@ def show_chat():
     # Access badge
     allowed = get_allowed_sources(st.session_state.role)
     source_labels = {
-        'chat_messaging': '💬 Chat',
+        'chat_messaging': '💬 Chat · 💬 Slack',
         'email': '📧 Email',
-        'document': '📄 Docs',
+        'document': '📄 Docs · 🗂️ SharePoint · 🎫 Jira · 📝 Meetings · 🏢 HR',
         'survey': '📊 Surveys'
     }
     access_text = " · ".join([source_labels.get(s, s) for s in allowed])
+
     st.markdown(f"""
-    <div style='background:#f0f7ff; border-radius:8px;
-                padding:8px 12px; margin:4px 0;
-                font-size:12px; color:#1a1a1a;'>
-        🔐 <strong>Your access:</strong> {access_text}
+    <div style='background:#eff6ff; border-radius:8px;
+                padding:6px 12px; margin:4px 0 8px 0;
+                font-size:11px; border:1px solid #bfdbfe;'>
+        <span style='color:#1e40af;'>🔐 <strong>Access:</strong> {access_text}</span>
     </div>
     """, unsafe_allow_html=True)
 
-    st.divider()
+    st.markdown("---")
 
-    # Suggestions
+    # Role-based suggestions
     if not st.session_state.chat_history:
-        st.markdown("**💡 Try asking:**")
-        suggestions = [
+        role_suggestions = {
+            "CEO — Full Access": [
+                "What is the status of the Lucerne initiative?",
+                "What is the overall employee sentiment?",
+                "Why are employees leaving?",
+                "What is the average satisfaction score?",
+                "What are the biggest risks right now?"
+            ],
+            "CFO — Finance & Operations": [
+                "What is the Freiburg renovation budget?",
+                "What did the CFO decide about the budget?",
+                "What is the status of Freiburg renovation?",
+                "What is the average satisfaction score?",
+                "What are the open Jira tickets?"
+            ],
+            "HR Manager — People & Surveys": [
+                "Why are employees leaving the company?",
+                "What is the average satisfaction score?",
+                "What do employees think about career development?",
+                "What is the training support score?",
+                "What feedback did employees give about management?"
+            ],
+            "Operations Manager — Teams & Projects": [
+                "What is the status of the Lucerne initiative?",
+                "How is morale in Lucerne Operations?",
+                "What is causing the delay in Lucerne?",
+                "What are the open Jira tickets?",
+                "What was decided in the last meeting?"
+            ]
+        }
+        suggestions = role_suggestions.get(st.session_state.role, [
             "What is the status of the Lucerne initiative?",
             "How is morale in Lucerne Operations?",
             "Why are employees leaving?",
             "What is the average satisfaction score?",
             "What do employees think about career development?"
-        ]
+        ])
+
+        st.markdown(
+            "<p style='color:#374151; font-size:13px; "
+            "font-weight:600; margin-bottom:8px;'>💡 Try asking:</p>",
+            unsafe_allow_html=True
+        )
         for suggestion in suggestions:
             if st.button(f"→ {suggestion}", key=suggestion):
                 process_question(suggestion)
                 st.rerun()
-        st.divider()
+        st.markdown("---")
 
     # Chat history
     for chat in st.session_state.chat_history:
-        # User bubble
         st.markdown(
             f"<div class='user-bubble'>{chat['question']}</div>",
             unsafe_allow_html=True
@@ -358,17 +526,16 @@ def show_chat():
         confidence = result.get('confidence', 'low')
         badge_class = f"badge-{confidence}"
 
-        # Answer bubble
         st.markdown(
             f"<div class='assistant-bubble'>{result['answer']}</div>",
             unsafe_allow_html=True
         )
 
-        # Key finding
         if result.get('key_finding'):
             st.markdown(f"""
             <div class='answer-card'>
-                ⚡ <strong>Key finding:</strong> {result['key_finding']}
+                ⚡ <strong style='color:#1a3a6b;'>Key finding:</strong>
+                <span style='color:#111827;'> {result['key_finding']}</span>
                 <br><br>
                 <span class='{badge_class}'>
                     ● {confidence.upper()} CONFIDENCE
@@ -376,28 +543,27 @@ def show_chat():
             </div>
             """, unsafe_allow_html=True)
 
-        # Action needed
         if result.get('action_needed'):
             st.markdown(f"""
             <div style='background:#fff7ed; border-left:4px solid #f97316;
-                        border-radius:8px; padding:12px; margin:6px 0;
-                        color:#1a1a1a;'>
-                🎯 <strong>Action needed:</strong> {result['action_needed']}
+                        border-radius:8px; padding:12px; margin:6px 0;'>
+                <span style='color:#c2410c;'>
+                    🎯 <strong>Action needed:</strong>
+                </span>
+                <span style='color:#7c2d12;'> {result['action_needed']}</span>
             </div>
             """, unsafe_allow_html=True)
 
-        # Uncertainty
         if result.get('uncertainty'):
             st.markdown(f"""
-            <div style='background:#fafafa; border-radius:8px;
+            <div style='background:#f9fafb; border-radius:8px;
                         padding:10px; margin:6px 0;
-                        border:1px solid #e0e0e0;'>
-                <span style='color:#555; font-size:13px;'>
+                        border:1px solid #e5e7eb;'>
+                <span style='color:#6b7280; font-size:13px;'>
                 ⚠️ <em>{result['uncertainty']}</em></span>
             </div>
             """, unsafe_allow_html=True)
 
-        # Evidence — smart display
         if result.get('evidence'):
             evidence_list = result['evidence']
             with st.expander(
@@ -406,11 +572,15 @@ def show_chat():
                 for idx, ev in enumerate(evidence_list):
                     render_evidence_card(ev, idx + 1)
 
-        st.divider()
+        st.markdown("---")
 
     # Input
-    st.markdown("**Ask anything about your teams, projects, or people:**")
-    col1, col2 = st.columns([5, 1])
+    st.markdown(
+        "<p style='color:#6b7280; font-size:12px; margin-bottom:6px;'>"
+        "Ask anything about your teams, projects, or people:</p>",
+        unsafe_allow_html=True
+    )
+    col1, col2 = st.columns([6, 1])
     with col1:
         question = st.text_input(
             "",
@@ -419,7 +589,7 @@ def show_chat():
             key="question_input"
         )
     with col2:
-        send = st.button("Send")
+        send = st.button("→")
 
     if send and question:
         process_question(question)

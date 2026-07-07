@@ -7,25 +7,37 @@ ROLES = {
     "CEO — Full Access": {
         "can_see": ["chat_messaging", "email", "document", "survey"],
         "blocked_topics": [],
-        "description": "Full access to all sources and all teams"
+        "description": "Full access — all sources all teams"
     },
     "CFO — Finance & Operations": {
         "can_see": ["email", "document", "survey"],
-        "blocked_topics": [],
-        "description": "Access to financial documents and surveys"
+        "blocked_topics": [
+            "exit interview", "personal feedback",
+            "resignation reason", "why leaving"
+        ],
+        "description": "Finance and operations only"
     },
     "HR Manager — People & Surveys": {
         "can_see": ["survey", "document"],
-        "blocked_topics": ["budget", "financial", "finance", "freiburg renovation cost"],
-        "description": "Access to people data and survey results only"
+        "blocked_topics": [
+            "budget", "financial", "renovation cost",
+            "freiburg budget", "approved amount",
+            "eur", "cfo approved", "250000", "50000"
+        ],
+        "description": "People data and surveys only"
     },
     "Operations Manager — Teams & Projects": {
         "can_see": ["chat_messaging", "email", "document"],
-        "blocked_topics": ["salary", "payroll", "exit interview", "financial"],
-        "description": "Access to operational communications only"
+        "blocked_topics": [
+            "salary", "payroll", "financial",
+            "budget", "approved amount", "eur",
+            "cost", "renovation budget", "250000", "50000",
+            "exit interview", "resignation", "why did",
+            "why employees", "resign", "termination"
+        ],
+        "description": "Operational communications only"
     }
 }
-
 
 def get_allowed_sources(role: str) -> list:
     """Return which source types this role can access."""
@@ -41,16 +53,57 @@ def get_blocked_topics(role: str) -> list:
     return ROLES[role].get("blocked_topics", [])
 
 
+
+
 def is_question_allowed(role: str, question: str) -> bool:
-    """
-    Check if this role is allowed to ask this question.
-    Returns False if question touches a blocked topic.
-    """
     blocked = get_blocked_topics(role)
     question_lower = question.lower()
+
+    # Direct keyword match
     for topic in blocked:
         if topic in question_lower:
             return False
+
+    # Smart semantic blocking for Operations Manager
+    if role == "Operations Manager — Teams & Projects":
+        financial_signals = [
+            'budget', 'cost', 'price', 'eur', 'money',
+            'approved amount', 'financial', 'salary',
+            'pay', 'compensation', 'wages'
+        ]
+        resignation_signals = [
+            'resign', 'leaving', 'left', 'quit',
+            'termination', 'departure', 'exit',
+            'why did', 'why employees', 'reason for leaving'
+        ]
+        for signal in financial_signals + resignation_signals:
+            if signal in question_lower:
+                return False
+
+    # Smart semantic blocking for HR Manager
+    if role == "HR Manager — People & Surveys":
+        financial_signals = [
+            'budget', 'cost', 'eur', 'money',
+            'approved', 'financial', 'renovation cost',
+            'how much', 'price', 'amount'
+        ]
+        for signal in financial_signals:
+            if signal in question_lower:
+                return False
+
+    # Smart semantic blocking for CFO
+    if role == "CFO — Finance & Operations":
+        personal_signals = [
+            'exit interview', 'resignation letter',
+            'why did employees', 'why are employees leaving',
+            'personal feedback', 'individual complaint',
+            'who resigned', 'who left', 'which employee',
+            'personal opinion', 'private feedback'
+        ]
+        for signal in personal_signals:
+            if signal in question_lower:
+                return False
+
     return True
 
 
