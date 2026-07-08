@@ -1,14 +1,14 @@
 # Query Engine
 # Executive asks a question — Claude finds the answer with evidence
-# Searches ALL sources — chat, email, documents, surveys
-# Governance applied — role permissions enforced before AI sees data
-# Smart keyword expansion — finds synonyms automatically
-# Priority ordering — baseline surveys before exit interviews
-# Numeric score handling — calculates averages for rating questions
+# Priority 0: Benny's real text survey answers
+# Priority 1: Operational docs (chat, email, documents)
+# Priority 2: Other survey content
+# Priority 3: Exit interviews
 
 import anthropic
 import json
 import os
+import re
 from dotenv import load_dotenv
 from normalization.database import get_connection
 from governance.access_control import filter_results_by_role, get_allowed_sources
@@ -19,50 +19,189 @@ client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 # ─── KEYWORD EXPANSIONS ──────────────────────────────────────
 KEYWORD_EXPANSIONS = {
-    "career": ["career", "advancement", "promotion", "growth", "progression"],
-    "development": ["development", "training", "learning", "education", "upskilling"],
-    "morale": ["morale", "wellbeing", "satisfaction", "motivation", "engagement"],
-    "workload": ["workload", "overload", "capacity", "stress", "burnout"],
-    "management": ["management", "leadership", "supervisor", "manager", "feedback"],
-    "communication": ["communication", "transparency", "information", "feedback"],
-    "salary": ["salary", "compensation", "pay", "benefits", "wages"],
-    "leaving": ["leaving", "resignation", "turnover", "exit", "departure"],
-    "satisfied": ["satisfied", "satisfaction", "happy", "content", "engagement"],
-    "feedback": ["feedback", "review", "evaluation", "assessment", "recognition"],
-    "teamwork": ["teamwork", "collaboration", "team", "colleagues", "cooperation"],
-    "balance": ["balance", "workload", "hours", "flexibility", "wellbeing"],
-    "sentiment": ["sentiment", "morale", "satisfaction", "engagement", "culture"],
-    "trust": ["trust", "autonomy", "independence", "empowerment", "leadership"],
-    "training": ["training", "development", "learning", "courses", "education"],
-    "appreciation": ["appreciation", "recognition", "valued", "acknowledged", "reward"],
-    "score": ["score", "rating", "scale", "satisfaction", "satisfied"],
-    "average": ["average", "mean", "score", "rating", "overall"],
-    "rate": ["rate", "rating", "score", "scale", "satisfied"]
+    "career": [
+        "career", "advancement", "promotion", "growth",
+        "progression", "professional development",
+        "employee growth", "internal growth", "career path",
+        "career opportunities", "career development",
+        "career advancement", "career planning"
+    ],
+    "development": [
+        "development", "training", "learning", "education",
+        "upskilling", "professional development",
+        "company investment", "employee growth",
+        "training and development", "further education",
+        "skill development", "learning opportunities"
+    ],
+    "morale": [
+        "morale", "wellbeing", "satisfaction", "motivation",
+        "engagement", "work environment", "team atmosphere",
+        "employee morale", "team spirit", "workplace culture",
+        "job satisfaction", "employee happiness"
+    ],
+    "workload": [
+        "workload", "overload", "capacity", "stress", "burnout",
+        "peak hours", "pressure", "task distribution",
+        "work pressure", "overtime", "understaffed",
+        "too much work", "resource constraints"
+    ],
+    "leaving": [
+        "leaving", "resignation", "turnover", "exit",
+        "departure", "termination", "attrition",
+        "quit", "leaving company", "new job",
+        "job change", "career transition"
+    ],
+    "sentiment": [
+        "sentiment", "morale", "satisfaction", "engagement",
+        "culture", "work environment", "employee experience",
+        "workplace atmosphere", "team dynamics",
+        "employee sentiment", "staff feeling"
+    ],
+    "management": [
+        "management", "leadership", "supervisor", "manager",
+        "feedback", "direct manager", "team lead",
+        "management style", "leadership behavior",
+        "manager support", "supervisor feedback"
+    ],
+    "communication": [
+        "communication", "transparency", "information",
+        "feedback", "internal communication",
+        "company communication", "management communication",
+        "information sharing", "strategic communication"
+    ],
+    "salary": [
+        "salary", "compensation", "pay", "benefits", "wages",
+        "remuneration", "financial compensation",
+        "pay scale", "salary satisfaction"
+    ],
+    "satisfied": [
+        "satisfied", "satisfaction", "happy", "content",
+        "engagement", "job satisfaction", "role satisfaction",
+        "work satisfaction", "employee satisfaction"
+    ],
+    "feedback": [
+        "feedback", "review", "evaluation", "assessment",
+        "recognition", "performance review",
+        "employee feedback", "manager feedback"
+    ],
+    "teamwork": [
+        "teamwork", "collaboration", "team", "colleagues",
+        "cooperation", "team collaboration", "team dynamics",
+        "working together", "cross-team", "interdepartmental"
+    ],
+    "balance": [
+        "balance", "workload", "hours", "flexibility",
+        "wellbeing", "work-life balance", "life balance",
+        "flexible working", "work hours", "personal time"
+    ],
+    "trust": [
+        "trust", "autonomy", "independence", "empowerment",
+        "leadership", "leadership trust", "trust in management",
+        "company trust", "organizational trust"
+    ],
+    "training": [
+        "training", "development", "learning", "courses",
+        "education", "training support", "further education",
+        "professional training", "skill training",
+        "training opportunities", "training program"
+    ],
+    "appreciation": [
+        "appreciation", "recognition", "valued", "acknowledged",
+        "reward", "employee recognition", "feeling valued",
+        "acknowledgment", "praise", "positive feedback"
+    ],
+    "score": [
+        "score", "rating", "scale", "satisfaction", "satisfied",
+        "out of 7", "survey score", "employee score"
+    ],
+    "average": [
+        "average", "mean", "score", "rating", "overall",
+        "average score", "overall score", "mean score"
+    ],
+    "rate": [
+        "rate", "rating", "score", "scale", "satisfied",
+        "how do employees rate", "employee rating"
+    ],
+    "risk": [
+        "risk", "attrition", "turnover", "resignation",
+        "people risk", "retention risk", "talent risk",
+        "employee risk", "hr risk"
+    ],
+    "retention": [
+        "retention", "attrition", "turnover", "keeping employees",
+        "employee retention", "staff retention",
+        "talent retention", "reduce turnover"
+    ],
+    "culture": [
+        "culture", "company culture", "workplace culture",
+        "organizational culture", "team culture",
+        "work environment", "values", "company values"
+    ],
+    "performance": [
+        "performance", "productivity", "efficiency",
+        "employee performance", "team performance",
+        "performance review", "performance score"
+    ],
+    "jira": [
+        "jira", "ticket", "alps", "frbs", "issue",
+        "task", "hr-301", "project ticket", "open ticket"
+    ],
+    "ticket": [
+        "ticket", "jira", "alps", "frbs", "issue",
+        "task", "blocked", "done", "in progress", "open"
+    ],
+    "renovation": [
+        "renovation", "freiburg", "panorama", "resort",
+        "construction", "refurbishment", "upgrade"
+    ],
+    "initiative": [
+        "initiative", "project", "lucerne", "guest experience",
+        "check-in", "digital", "modernization"
+    ],
+    "legacy": [
+        "legacy", "oracle", "hms", "old system",
+        "api", "integration", "wrapper", "system fix"
+    ],
+    "improve": [
+        "improve", "suggestion", "recommend", "better",
+        "change", "improvement", "enhancement", "wish",
+        "would like", "could do", "should do"
+    ],
+    "appreciate": [
+        "appreciate", "like", "enjoy", "positive",
+        "good", "great", "love", "value", "best"
+    ]
 }
 
-# ─── SCORE QUESTION DETECTION ────────────────────────────────
 SCORE_KEYWORDS = [
     'score', 'rating', 'scale', 'out of', 'average',
-    'rate', 'number', 'how many', 'how much', 'points',
-    'satisfied', 'satisfaction', 'recommend', 'motivated',
-    'balance', 'manager', 'leadership', 'workspace'
+    'rate', 'how much', 'points', 'satisfied', 'satisfaction',
+    'recommend', 'motivated', 'balance', 'manager',
+    'leadership', 'workspace'
 ]
 
-# ─── FINANCIAL KEYWORDS ──────────────────────────────────────
 FINANCIAL_KEYWORDS = [
     'budget', 'cost', 'approved', 'eur', 'financial',
     'money', 'spend', 'investment', 'price', 'amount'
 ]
 
+TEAM_KEYWORDS = [
+    'how many', 'headcount', 'number of employees',
+    'how many employees', 'team size', 'how many people',
+    'employees in', 'staff in', 'members', 'how many staff'
+]
+
 
 def is_score_question(question: str) -> bool:
-    q = question.lower()
-    return any(kw in q for kw in SCORE_KEYWORDS)
+    return any(kw in question.lower() for kw in SCORE_KEYWORDS)
 
 
 def is_financial_question(question: str) -> bool:
-    q = question.lower()
-    return any(kw in q for kw in FINANCIAL_KEYWORDS)
+    return any(kw in question.lower() for kw in FINANCIAL_KEYWORDS)
+
+
+def is_team_count_question(question: str) -> bool:
+    return any(kw in question.lower() for kw in TEAM_KEYWORDS)
 
 
 def expand_keywords(question: str) -> list:
@@ -128,7 +267,6 @@ def get_all_averages() -> str:
     ]
 
     results = []
-
     for label, keyword in questions_to_calculate:
         cursor.execute("""
             SELECT content, author_email FROM raw_documents
@@ -141,7 +279,6 @@ def get_all_averages() -> str:
         rows = cursor.fetchall()
         scores = []
         unique_respondents = set()
-
         for row in rows:
             try:
                 score_part = row[0].split('Score:')[1]\
@@ -162,28 +299,97 @@ def get_all_averages() -> str:
             )
 
     conn.close()
-
     if results:
         return "SURVEY SCORE AVERAGES:\n" + "\n".join(results)
     return None
+
+
+def get_team_stats() -> str:
+    """Calculate team headcount from survey data."""
+    try:
+        import pandas as pd
+        df = pd.read_csv(
+            'data/structured/alpenblick_hospitality_export_enriched.csv'
+        )
+        df['teams'] = df['teams'].astype(str)
+
+        team_map = {
+            'Lucerne Grand Hotel': 0,
+            'Lucerne Operations': 0,
+            'Lucerne Guest-Facing Services': 0,
+            'Freiburg Operations': 0,
+            'Freiburg Panorama Resort': 0,
+            'Freiburg Guest-Facing Services': 0
+        }
+
+        unique_employees = df.drop_duplicates('respondent_id')
+        for _, row in unique_employees.iterrows():
+            teams_str = str(row['teams'])
+            for team in team_map:
+                words = team.split()
+                if all(w in teams_str for w in words[:2]):
+                    team_map[team] += 1
+
+        result = "TEAM HEADCOUNT (survey participants):\n"
+        for team, count in team_map.items():
+            if count > 0:
+                result += f"  {team}: {count} employees\n"
+        result += f"  Total unique employees surveyed: {unique_employees.shape[0]}"
+        return result
+    except Exception:
+        return None
+
+
+def get_employee_info(question: str) -> str:
+    """Look up employee team directly from survey CSV."""
+    try:
+        import pandas as pd
+        id_match = re.search(r'6687\d+|2618\d+', question)
+        if not id_match:
+            return None
+
+        emp_id = int(id_match.group())
+        df = pd.read_csv(
+            'data/structured/alpenblick_hospitality_export_enriched.csv'
+        )
+        emp_data = df[df['respondent_id'] == emp_id]
+
+        if emp_data.empty:
+            return f"Employee #{emp_id}: Not found in survey data."
+
+        teams_raw = emp_data['teams'].iloc[0]
+        total_responses = len(emp_data)
+        surveys = emp_data['questionnaire_title'].unique().tolist()
+        gender = emp_data['gender'].iloc[0] \
+            if 'gender' in emp_data.columns else 'Unknown'
+        start_date = emp_data['start_date'].iloc[0] \
+            if 'start_date' in emp_data.columns else 'Unknown'
+
+        return (
+            f"EMPLOYEE PROFILE — #{emp_id}:\n"
+            f"  Teams: {teams_raw}\n"
+            f"  Gender: {gender}\n"
+            f"  Start date: {start_date}\n"
+            f"  Survey responses: {total_responses}\n"
+            f"  Participated in: {', '.join([str(s) for s in surveys])}"
+        )
+    except Exception:
+        return None
 
 
 def ask_claude(question: str, context_docs: list, pre_calculated: str = None) -> dict:
     context = ""
     evidence = []
 
-    max_docs = len(context_docs)
-    for i, doc in enumerate(context_docs[:max_docs]):
+    for i, doc in enumerate(context_docs[:5]):
         context += f"\n[SOURCE {i+1}]"
         context += f"\nType: {doc['source_type']}"
         context += f"\nFrom: {doc['author_email']}"
         context += f"\nDate: {doc['timestamp']}"
-        context += f"\nContent: {doc['content'][:400]}"
+        context += f"\nContent: {doc['content'][:500]}"
         context += "\n---"
 
         full_content = doc['content']
-
-        # Translate only first 3 non-English docs
         translation = None
         if is_non_english(full_content) and i < 3:
             translation = translate_text(full_content)
@@ -201,36 +407,29 @@ def ask_claude(question: str, context_docs: list, pre_calculated: str = None) ->
     prompt = f"""You are an intelligent executive assistant for Alpenblick Hospitality.
 
 STRICT RULES:
-1. Answer based ONLY on documents DIRECTLY relevant to the question.
-2. IGNORE documents that match keywords but are NOT about the question topic.
-   Example: Question about BUDGET → ignore exit interviews, morale surveys, HR tickets
-   Example: Question about MORALE → ignore budget emails, project tickets
-   Be STRICT — only use documents that DIRECTLY answer the question.
-3. Be direct and concise — this is for a busy executive on mobile.
-4. All languages understood — German, Arabic, French, Italian, Japanese, Korean, Portuguese.
-5. Always respond in ENGLISH only.
-6. If multiple employees say the same thing — mention this pattern explicitly.
-7. ALWAYS distinguish between current employees and departing employees.
-8. Never say no data exists unless you truly have zero relevant documents.
-9. ALWAYS distinguish between current employees and departing employees.
-10. If the documents do NOT contain information relevant to the question:
-    - Say: "This information is not available in any connected source."
-    - Set confidence to "low"
-    - Set action_needed to: "Consider connecting the relevant data source."
-    - Set uncertainty to null
-    - CRITICAL: Do NOT use unrelated documents as evidence
-    - CRITICAL: Do NOT show evidence that does not directly answer the question
-    - If a document mentions the topic only by coincidence — ignore it
-    - Only use documents where the MAIN content answers the question
+1. Answer ONLY from documents that DIRECTLY answer the question.
+2. IGNORE any document not directly about the question topic.
+3. Be direct — 2-3 sentences maximum.
+4. All languages understood — respond in ENGLISH only.
+5. Mention cross-language patterns when relevant.
+6. Distinguish current employees from departing employees.
+
+CONFIDENCE RULES:
+- HIGH: 3+ directly relevant sources confirm the answer
+- MEDIUM: 1-2 sources or partial information
+- LOW: No relevant sources or very uncertain
+
+EVIDENCE RULES:
+- Only cite documents that DIRECTLY answer the question
+- Better to show 1 relevant source than 5 irrelevant ones
+
+HALLUCINATION RULES:
+- If you have no evidence — say "I found no evidence for this."
+- NEVER invent facts not in the documents
 
 {f'''
-‼️ MANDATORY — USE THESE PRE-CALCULATED RESULTS:
+‼️ PRE-CALCULATED DATA — USE THIS FIRST:
 {pre_calculated}
-
-When answering about ANY score or average:
-- Use ONLY the numbers above
-- Never calculate your own average from the documents
-- Start your answer with the pre-calculated result
 ''' if pre_calculated else ''}
 
 QUESTION: {question}
@@ -238,14 +437,14 @@ QUESTION: {question}
 DOCUMENTS:
 {context}
 
-Respond ONLY with valid JSON — no markdown:
+Respond ONLY with valid JSON:
 {{
-    "answer": "direct answer in 2-3 sentences maximum",
+    "answer": "2-3 sentence direct answer",
     "confidence": "high or medium or low",
-    "key_finding": "the single most important thing the executive should know",
-    "action_needed": "what action should be taken, or null if none",
-    "uncertainty": "what you are not sure about, or null if confident",
-    "sources_used": ["list of source types actually used"]
+    "key_finding": "single most important insight",
+    "action_needed": "specific action or null",
+    "uncertainty": "what is unclear or null",
+    "relevant_sources": [1, 2, 3]
 }}"""
 
     try:
@@ -257,7 +456,25 @@ Respond ONLY with valid JSON — no markdown:
         text = response.content[0].text.strip()
         text = text.replace("```json", "").replace("```", "").strip()
         result = json.loads(text)
-        result["evidence"] = evidence
+
+        relevant_indices = result.pop("relevant_sources", [])
+        answer_lower = result.get("answer", "").lower()
+
+        no_evidence_signals = [
+            "found no evidence", "no evidence",
+            "not available", "no relevant", "no data"
+        ]
+        if any(s in answer_lower for s in no_evidence_signals):
+            result["evidence"] = []
+        elif relevant_indices:
+            relevant_evidence = []
+            for idx in relevant_indices:
+                if 1 <= idx <= len(evidence):
+                    relevant_evidence.append(evidence[idx - 1])
+            result["evidence"] = relevant_evidence if relevant_evidence else []
+        else:
+            result["evidence"] = evidence[:3]
+
         return result
 
     except Exception as e:
@@ -272,6 +489,7 @@ Respond ONLY with valid JSON — no markdown:
 
 
 def query(question: str, role: str = "CEO — Full Access") -> dict:
+    """Main query function."""
     print(f"\n🔍 Searching for: {question}")
     print(f"🔐 Role: {role}")
 
@@ -306,7 +524,51 @@ def query(question: str, role: str = "CEO — Full Access") -> dict:
     where_content = " OR ".join(conditions_content)
     where_topics = " OR ".join(conditions_topics)
 
-    # Step 1 — Search unstructured
+    # Step 0a — Benny's text answers by TOPICS
+    cursor.execute(f"""
+        SELECT r.id, r.source_system, r.source_type,
+               r.author_email, r.timestamp, r.content,
+               r.metadata, e.sentiment, e.people_mentioned,
+               e.projects_mentioned, e.decisions, e.key_topics
+        FROM raw_documents r
+        INNER JOIN enriched_documents e ON r.id = e.raw_document_id
+        WHERE r.source_type = 'survey'
+        AND r.author_email LIKE 'respondent_6687%'
+        AND r.content NOT LIKE '%Score:%'
+        AND ({where_topics})
+        ORDER BY r.timestamp DESC
+        LIMIT 5
+    """, params_topics)
+    benny_topics = cursor.fetchall()
+
+    # Step 0b — Benny's text answers by CONTENT directly
+    cursor.execute(f"""
+        SELECT r.id, r.source_system, r.source_type,
+               r.author_email, r.timestamp, r.content,
+               r.metadata, e.sentiment, e.people_mentioned,
+               e.projects_mentioned, e.decisions, e.key_topics
+        FROM raw_documents r
+        LEFT JOIN enriched_documents e ON r.id = e.raw_document_id
+        WHERE r.source_type = 'survey'
+        AND r.author_email LIKE 'respondent_6687%'
+        AND r.content NOT LIKE '%Score:%'
+        AND ({where_content})
+        ORDER BY r.timestamp DESC
+        LIMIT 8
+    """, params_content)
+    benny_content = cursor.fetchall()
+
+    # Combine Benny results
+    benny_seen = set()
+    benny_text = []
+    for doc in list(benny_topics) + list(benny_content):
+        if doc['id'] not in benny_seen:
+            benny_seen.add(doc['id'])
+            benny_text.append(doc)
+
+    print(f"📊 Benny text answers: {len(benny_text)}")
+
+    # Step 1 — Operational docs
     cursor.execute(f"""
         SELECT r.id, r.source_system, r.source_type,
                r.author_email, r.timestamp, r.content,
@@ -321,7 +583,7 @@ def query(question: str, role: str = "CEO — Full Access") -> dict:
     """, params_content)
     unstructured = cursor.fetchall()
 
-    # Step 2 — Search survey by content
+    # Step 2 — Survey by content
     cursor.execute(f"""
         SELECT r.id, r.source_system, r.source_type,
                r.author_email, r.timestamp, r.content,
@@ -337,7 +599,7 @@ def query(question: str, role: str = "CEO — Full Access") -> dict:
     """, params_content)
     surveys_content = cursor.fetchall()
 
-    # Step 3 — Search survey by enriched topics
+    # Step 3 — Survey by topics (all including scores)
     cursor.execute(f"""
         SELECT r.id, r.source_system, r.source_type,
                r.author_email, r.timestamp, r.content,
@@ -346,7 +608,6 @@ def query(question: str, role: str = "CEO — Full Access") -> dict:
         FROM raw_documents r
         INNER JOIN enriched_documents e ON r.id = e.raw_document_id
         WHERE r.source_type = 'survey'
-        AND r.content NOT LIKE '%Score:%'
         AND ({where_topics})
         ORDER BY
             CASE
@@ -359,51 +620,33 @@ def query(question: str, role: str = "CEO — Full Access") -> dict:
     """, params_topics)
     surveys_topics = cursor.fetchall()
 
-    # Step 4 — Numeric scores if score question
-    numeric_results = []
-    if is_score_question(question):
-        cursor.execute(f"""
-            SELECT r.id, r.source_system, r.source_type,
-                   r.author_email, r.timestamp, r.content,
-                   r.metadata, e.sentiment, e.people_mentioned,
-                   e.projects_mentioned, e.decisions, e.key_topics
-            FROM raw_documents r
-            LEFT JOIN enriched_documents e ON r.id = e.raw_document_id
-            WHERE r.source_type = 'survey'
-            AND r.content NOT LIKE '%Score:%'
-            AND r.author_email LIKE 'respondent_6687%'
-            AND ({where_content})
-            ORDER BY r.timestamp DESC
-            LIMIT 5
-        """, params_content)
-        numeric_results = cursor.fetchall()
-        print(f"🔢 Score question — found {len(numeric_results)} text results")
-
     conn.close()
 
-    # Combine with priority
+    # ── COMBINE — STRICT PRIORITY ─────────────────────────────
     seen = set()
     all_results = []
 
-    for doc in list(numeric_results):
+    # PRIORITY 0 — Benny's real text answers FIRST
+    for doc in list(benny_text):
         if doc['id'] not in seen:
             seen.add(doc['id'])
             all_results.append(doc)
 
+    # PRIORITY 1 — Operational docs
     for doc in list(unstructured):
         if doc['id'] not in seen:
             seen.add(doc['id'])
             all_results.append(doc)
 
-    for doc in list(surveys_topics) + list(surveys_content):
+    # PRIORITY 2 — Other survey content
+    for doc in list(surveys_content):
         if doc['id'] not in seen:
-            author = doc['author_email'] or ''
-            if 'respondent_6' in author or 'respondent_1' in author:
-                seen.add(doc['id'])
-                all_results.append(doc)
+            seen.add(doc['id'])
+            all_results.append(doc)
 
+    # PRIORITY 3 — Exit interviews (max 2)
     exit_count = 0
-    for doc in list(surveys_topics) + list(surveys_content):
+    for doc in list(surveys_topics):
         if doc['id'] not in seen:
             author = doc['author_email'] or ''
             if 'respondent_2' in author and exit_count < 2:
@@ -411,27 +654,27 @@ def query(question: str, role: str = "CEO — Full Access") -> dict:
                 all_results.append(doc)
                 exit_count += 1
 
-    for doc in list(surveys_topics) + list(surveys_content):
+    # PRIORITY 4 — anything remaining
+    for doc in list(surveys_topics):
         if doc['id'] not in seen:
             seen.add(doc['id'])
             all_results.append(doc)
 
-    # Apply governance
+    # Governance
     filtered_results = filter_results_by_role(all_results, role)
 
-    # For financial questions — only show financial relevant sources
+    # Financial filter
     if is_financial_question(question):
         financial_docs = [
             d for d in filtered_results
             if d['source_type'] in ('email', 'document', 'chat_messaging')
             and any(kw in d['content'].lower()
-                   for kw in ['budget', 'eur', 'approved', 'cost', 'amount'])
+                   for kw in ['budget', 'eur', 'approved', 'cost'])
         ]
         if financial_docs:
             filtered_results = financial_docs
-            print(f"💰 Financial question — filtered to {len(filtered_results)} financial docs")
 
-    # Remove duplicate content
+    # Deduplicate
     seen_content = set()
     unique_results = []
     for doc in filtered_results:
@@ -462,54 +705,56 @@ def query(question: str, role: str = "CEO — Full Access") -> dict:
             "evidence": []
         }
 
-    print(f"✅ Final: {len(filtered_results)} documents after all filters")
+    # Pre-calculated data
+    pre_calculated = None
 
-    # Pre-calculate averages for score questions
-    pre_calculated = None
-    pre_calculated = None
+    # Employee lookup
+    emp_info = get_employee_info(question)
+    if emp_info:
+        pre_calculated = emp_info
+        id_match = re.search(r'6687\d+|2618\d+', question)
+        if id_match:
+            emp_id = id_match.group()
+            from normalization.database import get_connection as get_conn
+            emp_conn = get_conn()
+            emp_cursor = emp_conn.cursor()
+            emp_cursor.execute("""
+                SELECT r.id, r.source_system, r.source_type,
+                       r.author_email, r.timestamp, r.content,
+                       r.metadata, e.sentiment, e.people_mentioned,
+                       e.projects_mentioned, e.decisions, e.key_topics
+                FROM raw_documents r
+                LEFT JOIN enriched_documents e ON r.id = e.raw_document_id
+                WHERE r.author_email LIKE ?
+                AND r.source_type = 'survey'
+                AND r.metadata LIKE '%teams%'
+                LIMIT 3
+            """, (f"%{emp_id}%",))
+            emp_survey_docs = emp_cursor.fetchall()
+            emp_conn.close()
+            if emp_survey_docs:
+                filtered_results = list(emp_survey_docs)
+
+    # Team headcount
+    if is_team_count_question(question):
+        team_stats = get_team_stats()
+        if team_stats:
+            pre_calculated = (
+                team_stats if not pre_calculated
+                else pre_calculated + '\n\n' + team_stats
+            )
+
+    # Score averages
     if is_score_question(question):
-        pre_calculated = get_all_averages()
-        if pre_calculated:
-            print(f"📊 Pre-calculated averages ready")
+        averages = get_all_averages()
+        if averages:
+            pre_calculated = (
+                averages if not pre_calculated
+                else pre_calculated + '\n\n' + averages
+            )
 
-    result = ask_claude(question, filtered_results, pre_calculated)
-
-    # If no relevant data found — clean up response
-    no_data_signals = [
-        'no relevant', 'no information', 'not found',
-        'cannot find', 'no data', 'not available',
-        'not present', 'no documents', 'does not contain',
-        'not contained', 'no specific'
-    ]
-    answer_lower = result.get('answer', '').lower()
-    if any(signal in answer_lower for signal in no_data_signals):
-        result['evidence'] = []
-        result['confidence'] = 'low'
-        result['answer'] = (
-            "This information is not available in any connected source. "
-            "The question may require a data source that is not yet connected."
-        )
-        result['key_finding'] = (
-            "Data not available in current connected sources."
-        )
-        result['action_needed'] = (
-            "Consider connecting the relevant data source "
-            "to answer this type of question."
-        )
-        result['uncertainty'] = None
-
-        result = ask_claude(question, filtered_results, pre_calculated)
-
-    # Safety check
-    if result is None:
-        result = {
-            "answer": "Could not process this question.",
-            "confidence": "low",
-            "key_finding": "System error",
-            "action_needed": None,
-            "uncertainty": None,
-            "evidence": []
-        }
+    print(f"✅ Final: {len(filtered_results)} documents")
+    print(f"📊 Benny first: {len(benny_text)} text answers")
 
     result = ask_claude(question, filtered_results, pre_calculated)
 
@@ -524,12 +769,12 @@ def query(question: str, role: str = "CEO — Full Access") -> dict:
             "evidence": []
         }
 
-    # If no relevant data — clean response
+    # Clean response when no data
     no_data_signals = [
-        'no relevant', 'no information', 'not found',
-        'cannot find', 'no data', 'not available',
-        'not present', 'no documents', 'does not contain',
-        'not contained', 'no specific'
+        'no relevant information',
+        'cannot find any information',
+        'not available in any connected',
+        'no documents contain',
     ]
     answer_lower = result.get('answer', '').lower()
     if any(signal in answer_lower for signal in no_data_signals):
@@ -561,8 +806,8 @@ def run_test_queries():
         "What are the main reasons employees are leaving the company?",
         "How do employees rate their work life balance out of 7?",
         "What is the overall sentiment across all teams?",
-        "What feedback did employees give about management?",
-        "What do employees appreciate most about working at Alpenblick?"
+        "What improvements do employees suggest for the company?",
+        "How many employees work in Freiburg Operations?"
     ]
 
     print("\n🎯 EXECUTIVE QUERY TEST — 12 QUESTIONS")
