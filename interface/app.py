@@ -315,11 +315,37 @@ def render_evidence_card(e: dict, number: int):
     date_display = str(e['date'])[:10]
     content = e.get('preview', '')
 
+   
+
+        # Parse content based on format
     score_value = None
     question_part = None
     answer_part = content
 
-    if 'Q:' in content and 'Score:' in content and 'out of 7' in content:
+    # Format 1: New survey format "Question:\n...\n\nAnswer:\n..."
+    if 'Question:\n' in content and '\n\nAnswer:\n' in content:
+        parts = content.split('\n\nAnswer:\n')
+        question_part = parts[0].replace('Question:\n', '').strip()
+        answer_part = parts[1].strip() if len(parts) > 1 else content
+        if '\n\nTopics:' in answer_part:
+            answer_part = answer_part.split('\n\nTopics:')[0].strip()
+        if '\n\nKeywords:' in answer_part:
+            answer_part = answer_part.split('\n\nKeywords:')[0].strip()
+        answer_part = answer_part.replace('• ', '').strip()
+
+    # Format 2: New score format "Question:\n...\n\nScore:\n..."
+    elif 'Question:\n' in content and '\n\nScore:\n' in content:
+        parts = content.split('\n\nScore:\n')
+        question_part = parts[0].replace('Question:\n', '').strip()
+        score_str = parts[1].strip().split('\n')[0] if len(parts) > 1 else ''
+        try:
+            score_value = float(score_str.split('/')[0].strip())
+            answer_part = None
+        except:
+            answer_part = score_str
+
+    # Format 3: Old format "Q: ... | Score: X out of 7"
+    elif 'Q:' in content and 'Score:' in content and 'out of 7' in content:
         try:
             question_part = content.split('|')[0].replace('Q:', '').strip()
             score_str = content.split('Score:')[1].split('out of 7')[0].strip()
@@ -327,6 +353,8 @@ def render_evidence_card(e: dict, number: int):
             answer_part = None
         except:
             pass
+
+    # Format 4: Old format "Q: ... | A: ..."
     elif 'Q:' in content and '| A:' in content:
         parts = content.split('| A:')
         question_part = parts[0].replace('Q:', '').strip()
@@ -335,6 +363,15 @@ def render_evidence_card(e: dict, number: int):
             answer_part = answer_part.split('| Type:')[0].strip()
         if '| Score:' in answer_part:
             answer_part = answer_part.split('| Score:')[0].strip()
+        answer_part = answer_part.rstrip('| ').strip()
+
+        # Clean Topics and Keywords nan from display
+    if answer_part:
+     answer_part = answer_part.replace('| Topics: nan', '')
+     answer_part = answer_part.replace('| Keywords: nan', '')
+     answer_part = answer_part.replace('Topics: nan', '')
+     answer_part = answer_part.replace('Keywords: nan', '')
+     answer_part = answer_part.strip().rstrip('|').strip()
 
     # Evidence header
     st.markdown(f"""
@@ -386,7 +423,7 @@ def render_evidence_card(e: dict, number: int):
             </p>
         </div>
         """, unsafe_allow_html=True)
-
+    
     elif answer_part:
         if question_part:
             st.markdown(
@@ -396,10 +433,10 @@ def render_evidence_card(e: dict, number: int):
                 unsafe_allow_html=True
             )
         st.markdown(
-            f"<div style='background:#f9fafb; border-radius:8px; "
+            f"<div style='background:#f8fafc; border-radius:8px; "
             f"padding:10px 14px; margin:0 0 8px 0; "
             f"border:1px solid #e5e7eb;'>"
-            f"<p style='margin:0; color:#111827; font-size:13px; "
+            f"<p style='margin:0; color:#1a1a1a; font-size:13px; "
             f"line-height:1.7;'>{answer_part}</p>"
             f"</div>",
             unsafe_allow_html=True
@@ -468,32 +505,32 @@ def show_chat():
     if not st.session_state.chat_history:
         role_suggestions = {
             "CEO — Full Access": [
-                "What is the status of the Lucerne initiative?",
-                "What is the overall employee sentiment?",
-                "Why are employees leaving?",
-                "What is the average satisfaction score?",
-                "What are the biggest risks right now?"
+                "Why are employees leaving the company?",
+                "Which project has the highest risk right now?",
+                "What is the overall company morale?",
+                "Summarize the Lucerne Guest Experience Initiative",
+                "What are the biggest people risks at Alpenblick?"
             ],
             "CFO — Finance & Operations": [
-                "What is the Freiburg renovation budget?",
-                "What did the CFO decide about the budget?",
-                "What is the status of Freiburg renovation?",
-                "What is the average satisfaction score?",
-                "What are the open Jira tickets?"
+                "What is the Freiburg expansion budget status?",
+                "Which projects have financial risks?",
+                "What did the CFO decide about the Freiburg renovation?",
+                "What is the status of the Lucerne initiative?",
+                "What are the open Jira tickets and their priorities?"
             ],
             "HR Manager — People & Surveys": [
-                "Why are employees leaving the company?",
-                "What is the average satisfaction score?",
+                "What are the main employee complaints?",
+                "What are the main reasons for resignation?",
                 "What do employees think about career development?",
-                "What is the training support score?",
-                "What feedback did employees give about management?"
+                "Which teams have the lowest satisfaction scores?",
+                "Which teams have low engagement?"
             ],
             "Operations Manager — Teams & Projects": [
-                "What is the status of the Lucerne initiative?",
-                "How is morale in Lucerne Operations?",
-                "What is causing the delay in Lucerne?",
-                "What are the open Jira tickets?",
-                "What was decided in the last meeting?"
+                "What operational issues exist right now?",
+                "What are the current engineering blockers?",
+                "What happened in the latest operations meeting?",
+                "Which Jira issues are delayed or blocked?",
+                "What is the status of the Lucerne initiative?"
             ]
         }
         suggestions = role_suggestions.get(st.session_state.role, [

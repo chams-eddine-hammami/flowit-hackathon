@@ -48,18 +48,23 @@ class SurveyConnector(BaseConnector):
                 "author_name": f"respondent_{row['respondent_id']}",
                 "timestamp": str(row.get("answer_submission_start", "")),
                 "content": (
-    f"Q: {row['question_text']} | "
-    f"Score: {row['answer']} out of 7 | Type: numeric rating scale 1-7"
-    if row.get('question_type') == 'range_slider'
-    else f"Q: {row['question_text']} | A: {row['answer']}"
+    f"Question:\n{row['question_text']}\n\n"
+    f"Score:\n{row['answer']} / 7"
+    if row.get("question_type") == "range_slider"
+    else (
+        f"Question:\n{row['question_text']}\n\n"
+        f"Answer:\n{str(row['answer']).replace(' | ', chr(10) + '• ')}"
+    )
 ),
                 "metadata": {
-                    "questionnaire": row.get("questionnaire_title", ""),
-                    "question_type": row.get("question_type", ""),
-                    "sentiment": row.get("sentiment", ""),
-                    "teams": row.get("teams", ""),
-                    "gender": row.get("gender", "")
-                }
+    "questionnaire": row.get("questionnaire_title", ""),
+    "question_type": row.get("question_type", ""),
+    "sentiment": row.get("sentiment", ""),
+    "teams": row.get("teams", ""),
+    "gender": row.get("gender", ""),
+    "topics": row.get("topics", ""),
+    "keywords": row.get("keywords", "")
+}
             })
         self.log(f"Normalized {len(normalized)} survey responses ready for pipeline")
         return normalized
