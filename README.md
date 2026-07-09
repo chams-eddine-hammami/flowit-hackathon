@@ -1,213 +1,289 @@
-# Flowit Intelligence Platform
-## Hackathon Submission — Problem A
-### Connected Intelligence from a Messy Ecosystem
+# flowit AI — Connected Intelligence
+
+**Flowit Engineering Hackathon 2026 — Problem A**  
+**Candidate:** Chams Eddine Hammami
 
 ---
 
-## What This Is
+## What This System Does
 
-A production-ready AI platform that connects scattered company data
-from multiple sources, understands it, and surfaces the right answer
-to the right person at the right moment — on mobile, with evidence.
-
-Built for Alpenblick Hospitality as a demonstration.
-Designed to work for any company.
-
----
-
-## The Problem
-
-Company data is scattered everywhere:
-- Chat messages in Teams
-- Emails in Outlook
-- Documents in SharePoint
-- Survey results in survey platforms
-- Employee records in legacy HR systems
-
-No one can see the full picture.
-Executives waste time digging through tools.
-Decisions are made without evidence.
-
----
-
-## The Solution
-
-One unified AI platform that:
-1. **Ingests** data from any source — no hand-rolled integration per source
-2. **Understands** it — entity resolution, relationships, provenance
-3. **Surfaces** the right answer on mobile — with evidence
-4. **Enforces** governance — permissions follow the data always
+One AI assistant that connects 9 enterprise data sources and answers executive questions with evidence.
 
 ---
 
 ## Architecture
 
-DATA SOURCES
-Teams · Email · Documents · Surveys · Legacy HR System
-↓
-CONNECTOR LAYER (plug-in architecture)
-One standard interface — 5 methods — add any source
-↓
-NORMALIZATION LAYER
-Structured → mapped directly
-Semi-structured → parsed
-Unstructured → Claude AI extracts meaning
-↓
-COMMON MODEL (SQLite)
-Entity resolution · Relationships · Provenance
-↓
-AI LAYER (Claude API)
-Enrichment · Query engine · Evidence linking
-↓
-GOVERNANCE LAYER
-Role-based access · Permissions filter before AI sees data
-Audit log · Every access tracked
-↓
-MOBILE INTERFACE (Streamlit)
-WhatsApp-style chat · Answer + evidence · Zero training needed
+See: docs/architecture.png
+![alt text](docs/architecture.png)
+---
+
+## Requirements
+
+Before starting make sure you have these installed:
+
+- Python 3.10 or higher — check with: python3 --version
+- pip latest — check with: pip --version
+- Git any version — check with: git --version
+- Anthropic API key — get from: https://console.anthropic.com/settings/keys
 
 ---
 
-## The 4 Requirements
-
-### 1. Ingest Heterogeneous Sources
-- Chat connector (Teams / Slack / Discord)
-- Email connector (Outlook / Gmail)
-- Document connector (Word / Google Docs)
-- Survey connector (Typeform / real Flowit dataset)
-- Legacy SQL connector (read-only, never modifies old system)
-- Generic connector (any REST API or CSV)
-
-**Key principle:** New source = new connector only.
-Nothing else changes.
-
-### 2. Common Model
-- Entity resolution: same person across sources → 1 unified profile
-- Relationships: who works on what, who emailed who
-- Provenance: every fact knows its source, author, and timestamp
-
-### 3. Mobile-First Surface
-- WhatsApp-style chat interface
-- Works in any phone browser — no app install needed
-- Answer in 2-3 sentences + key finding + action needed + evidence
-- Zero training required
-
-### 4. Governance as First-Class Concern
-- Role-based access: CEO sees all, HR sees people data only
-- Permissions enforced BEFORE data reaches Claude
-- Blocked topics return "Access denied" — not partial data
-- Every query logged with who, what, when
+## Setup — Step by Step
 
 ---
 
-## Legacy System
+### Step 1 — Clone the repository
 
-The platform sits alongside an existing legacy SQL system
-(Oracle/MySQL equivalent) without modifying it.
+Run this in your terminal:
 
-**Strategy:** Read-only connector bridges old and new.
-Legacy system keeps running. New AI stack grows next to it.
-This is the Strangler Fig pattern.
+    git clone https://github.com/chamseddinehammami18-debug/flowit-hackathon.git
+    cd flowit-hackathon
 
----
+Verify you are in the project folder:
 
-## Generality — The Real Test
+    ls
 
-> "A new source is a connector. A new use case is a config change."
-
-Adding Microsoft Teams → implement 5 standard methods → done.
-Switching to Slack → swap the adapter → nothing else changes.
-New use case → update query questions → no rewrite needed.
+You should see: connectors/ data/ ai_layer/ interface/ README.md
 
 ---
 
-## Tech Stack
+### Step 2 — Create Python virtual environment
 
-| Layer | Technology | Why |
-|---|---|---|
-| Connectors | Python + standard interface | Plug-in architecture |
-| Database | SQLite | Fast, portable, demo-ready |
-| AI | Claude API (claude-sonnet-4-6) | Best reasoning + evidence |
-| Interface | Streamlit | Python-native, mobile-friendly |
-| Governance | Role-based access control | Built-in, not bolted-on |
+On Mac or Linux:
 
----
+    python3 -m venv hackathon-env
+    source hackathon-env/bin/activate
 
-## How to Run
+On Windows:
 
-```bash
-# 1. Clone the repo
-git clone https://github.com/chamseddinehammami18-debug/flowit-hackathon.git
-cd flowit-hackathon
+    python3 -m venv hackathon-env
+    hackathon-env\Scriptsctivate
 
-# 2. Create environment
-python3 -m venv hackathon-env
-source hackathon-env/bin/activate
+Verify — you should see (hackathon-env) at the start of your terminal:
 
-# 3. Install dependencies
-pip install streamlit anthropic python-dotenv sqlalchemy pandas
+    (hackathon-env) your-computer flowit-hackathon %
 
-# 4. Add your API key
-echo "ANTHROPIC_API_KEY=your_key_here" > .env
-
-# 5. Run the pipeline
-python3 -m normalization.pipeline
-python3 -m common_model.entity_resolution
-python3 -m ai_layer.enrichment
-python3 -m connectors.legacy_connector
-
-# 6. Start the app
-streamlit run interface/app.py
-```
+If you do not see this — run the activate command again.
 
 ---
 
-## Demo Questions to Try
+### Step 3 — Install all dependencies
 
-- "What is the status of the Lucerne Guest Experience Initiative?"
-- "How is morale in Lucerne Operations team?"
-- "What did the CFO decide about the Freiburg budget?"
-- "Why are employees leaving the company?"
-- "What is the overall team sentiment?"
-- "Who owns the Lucerne initiative?"
+    pip install streamlit anthropic python-dotenv pandas sqlalchemy
+
+Wait 1-3 minutes until you see: Successfully installed ...
+
+Verify all packages installed correctly:
+
+    python3 -c "import streamlit, anthropic, pandas, sqlalchemy; print(All packages OK)"
+
+Expected output:
+
+    All packages OK
 
 ---
 
-## What I Would Build Next
+### Step 4 — Add your Anthropic API key
 
-- Vector search (semantic similarity — not just keywords)
-- Real-time streaming (Kafka for live sentiment alerts)
-- More connectors (Jira, Salesforce, SAP)
+Get your key here: https://console.anthropic.com/settings/keys
+
+Create the .env file:
+
+    echo "ANTHROPIC_API_KEY=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" > .env
+
+Verify the key is saved:
+
+    cat .env
+
+Expected output:
+
+    ANTHROPIC_API_KEY=sk-ant-...
+
+---
+
+### Step 5 — Run the data pipeline
+
+Run these 3 commands one by one. Wait for each to finish before running the next.
+
+Command 1 — ingest all 9 data sources:
+
+    python3 -m normalization.pipeline
+
+Expected output:
+
+    Survey responses : 1779
+    TOTAL stored     : 1811
+
+Command 2 — link same person across sources:
+
+    python3 -m common_model.entity_resolution
+
+Expected output:
+
+    Entity resolution complete
+
+Command 3 — add employee profiles:
+
+    python3 -m connectors.legacy_connector
+
+Verify the database was created:
+
+    ls data/
+
+You should see: flowit.db
+
+---
+
+### Step 6 — Start the application
+
+    streamlit run interface/app.py
+
+The app opens automatically at: http://localhost:8501
+
+You should see the flowit AI login page.
+
+---
+
+## How to Use the App
+
+Login with any name and select your role: CEO, CFO, HR Manager, or Operations Manager.
+
+---
+
+## Demo Questions
+
+CEO:
+- Why are employees leaving the company?
+- Which project has the highest risk right now?
+- What is the overall company morale?
+- Summarize the Lucerne Guest Experience Initiative
+- What are the biggest people risks at Alpenblick?
+
+CFO:
+- What is the Freiburg expansion budget status?
+- Which projects have financial risks?
+- What did the CFO decide about the Freiburg renovation?
+- What are the open Jira tickets and their priorities?
+- What is the status of the Lucerne initiative?
+
+HR Manager:
+- What are the main employee complaints?
+- What are the main reasons for resignation?
+- What do employees think about career development?
+- Which teams have the lowest satisfaction scores?
+- Which teams have low engagement?
+
+Operations Manager:
+- What operational issues exist right now?
+- What are the current engineering blockers?
+- Which Jira issues are delayed or blocked?
+- What happened in the latest operations meeting?
+- What is the status of the Lucerne initiative?
+
+---
+
+## Test Governance
+
+Login as Operations Manager and ask: What is the Freiburg budget?
+
+Expected: ACCESS DENIED — this topic is restricted for your role.
+
+---
+
+## Troubleshooting
+
+Problem: ModuleNotFoundError
+
+    source hackathon-env/bin/activate
+    pip install streamlit anthropic python-dotenv pandas sqlalchemy
+
+Problem: API key not found
+
+    cat .env
+
+Problem: Database errors
+
+    python3 -m normalization.pipeline
+    python3 -m common_model.entity_resolution
+    python3 -m connectors.legacy_connector
+
+Problem: Port already in use
+
+    streamlit run interface/app.py --server.port 8502
+    Then open: http://localhost:8502
+
+Problem: App opens but no answers
+
+    python3 -m ai_layer.query_engine
+
+
+---
+
+## Data Sources
+
+- Survey CSV (Benny dataset) — Structured — 1779 records — Real data from Flowit
+- Legacy HR SQL — Structured — 7 records
+- Jira tickets — Structured — 4 records
+- Teams chat — Semi-structured — 7 records
+- Outlook email — Semi-structured — 5 records
+- Slack messages — Semi-structured — 5 records
+- Word documents — Unstructured — 5 records
+- SharePoint files — Unstructured — 3 records
+- Meeting notes — Unstructured — 3 records
+
+Survey data is real data provided by Flowit (38 respondents, 8 languages).
+All other sources simulate real APIs using real respondent IDs.
+In production — each connector connects to the real API instead.
+
+---
+
+## AI and ML Techniques
+
+- RAG (Retrieval Augmented Generation) — evidence-based answering, no hallucination
+- LLM Claude Sonnet 4.6 — document enrichment and query answering
+- NLP Entity extraction — people, projects, decisions from text
+- NLP Sentiment analysis — positive/negative/neutral per document
+- NLP Language detection — 8 languages auto-detected
+- NLP Translation — non-English answers translated to English
+- Entity resolution — same person across 9 sources equals 1 unified profile
+- Statistical aggregation — real survey averages calculated from database
+- Smart routing — people questions go to survey first, operational to chat/email first
+- Targeted retrieval — question-type specific SQL queries for higher precision
+- RBAC — role-based access control governance layer
+
+---
+
+## Project Structure
+
+    flowit-hackathon/
+    connectors/          9 data source connectors
+    normalization/       ETL pipeline
+    common_model/        Entity resolution
+    ai_layer/            RAG query engine and enrichment
+    governance/          RBAC access control
+    interface/           Streamlit mobile app
+    data/structured/     Survey CSV Benny dataset
+    data/raw/            Simulated JSON data sources
+    docs/                Architecture diagram
+    build_log.md         Full AI usage disclosure
+    README.md            This file
+
+---
+
+## What Would Come Next
+
+- Vector search Pinecone/Weaviate for semantic retrieval
+- Real-time streaming Kafka for live sentiment alerts
+- More connectors Salesforce SAP Google Drive
 - Fine-tuned model on company vocabulary
 - Push notifications when sentiment drops
-
-
-## What I Would Build Next
-
-- **Vector search** (Pinecone / Weaviate) — replace keyword search with
-  semantic similarity for better document retrieval. Currently we send
-  the 15 most keyword-relevant documents to Claude. Vector search would
-  send the 15 most semantically similar — significantly improving answer
-  quality especially for multilingual content.
-
-- **Real-time streaming** (Apache Kafka) — replace batch pipeline with
-  live data ingestion for instant sentiment alerts.
-
-- **More connectors** — Jira, Salesforce, SAP, SharePoint API.
-
-- **Feedback loop** — executive rates answers → system learns what
-  is useful → improves over time.
-
-- **Fine-tuned model** — train on company-specific vocabulary for
-  better entity recognition.
-  
 
 ---
 
 ## Build Log
 
-See `build_log.md` for full AI tool usage disclosure.
+See build_log.md for full AI usage disclosure.
 
 ---
 
-*Built by Chams — Flowit Engineering Hackathon 2026*
+Built by Chams Eddine Hammami — Flowit Engineering Hackathon 2026
