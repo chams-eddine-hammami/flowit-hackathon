@@ -444,15 +444,22 @@ def render_evidence_card(e: dict, number: int):
 
     translation = e.get('translation')
     if translation:
-        st.markdown(
-            f"<div style='background:#f0fdf4; border-radius:8px; "
-            f"padding:8px 14px; margin:0 0 8px 0; "
-            f"border:1px solid #bbf7d0;'>"
-            f"<p style='margin:0; color:#166534; font-size:12px;'>"
-            f"🇬🇧 <strong>English:</strong> {translation}</p>"
-            f"</div>",
-            unsafe_allow_html=True
-        )
+        # Clean translation — remove question repetition
+        clean_translation = translation
+        if 'Question:' in translation:
+            clean_translation = translation.split('Question:')[0].strip()
+        if clean_translation:
+            st.markdown(
+                f"<div style='background:#f0fdf4; border-radius:8px; "
+                f"padding:8px 14px; margin:0 0 8px 0; "
+                f"border:1px solid #bbf7d0;'>"
+                f"<p style='margin:0; color:#166534; font-size:12px;'>"
+                f"🇬🇧 <strong>English translation:</strong></p>"
+                f"<p style='margin:4px 0 0 0; color:#14532d; "
+                f"font-size:13px; line-height:1.6;'>{clean_translation}</p>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
 
 
 # ─── CHAT PAGE ────────────────────────────────────────────────

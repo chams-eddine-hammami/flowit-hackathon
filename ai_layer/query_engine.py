@@ -758,6 +758,12 @@ HALLUCINATION RULES:
 - If you have no evidence — say "I found no evidence for this."
 - NEVER invent facts not in the documents
 
+COMPARISON RULE:
+- NEVER say "highest", "lowest", "most", "biggest" unless
+  pre-calculated data confirms the comparison across ALL items.
+- Instead say: "Based on available evidence, X appears to have..."
+- Only use superlatives when pre-calculated data explicitly shows ranking.
+
 {f'''
 ‼️ PRE-CALCULATED DATA — USE AS GROUND TRUTH:
 {pre_calculated}
