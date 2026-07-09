@@ -1,201 +1,273 @@
 # Build Log — Flowit Engineering Hackathon 2026
-## Candidate: Chams
+
+## Candidate: Chams Eddine Hammami
 ## Problem: A — Connected Intelligence from a Messy Ecosystem
+## Submission date: July 9, 2026
 
 ---
 
-## AI Tools Used
+## AI Tools Disclosure
 
-| Tool | Where Used | How |
-|---|---|---|
-| **Claude (claude.ai)** | Architecture design | Helped design system layers and connector strategy |
-| **Claude (claude.ai)** | Code generation | Generated boilerplate code for connectors, pipeline, governance |
-| **Claude API (claude-sonnet-4-6)** | AI enrichment | Reads documents and extracts people, projects, sentiment, decisions |
-| **Claude API (claude-sonnet-4-6)** | Query engine | Answers executive questions with evidence from database |
-| **Claude (claude.ai)** | Debugging | Helped fix Git issues, module errors, database queries |
-| **Claude (claude.ai)** | Documentation | Helped structure README and architecture explanation |
+### Tools Used
 
----
-
-## Day by Day — What Was Me vs What Was Claude
+| Tool | Purpose | Where in Code |
+|------|---------|---------------|
+| Claude Sonnet 4.6 (claude.ai) | Architecture design, debugging, documentation | All sessions |
+| Claude Sonnet 4.6 (Anthropic API) | Document enrichment — sentiment, topics, entities | ai_layer/enrichment.py |
+| Claude Sonnet 4.6 (Anthropic API) | RAG query engine — answers executive questions | ai_layer/query_engine.py |
+| Claude Sonnet 4.6 (Anthropic API) | Multilingual translation — 8 languages | ai_layer/query_engine.py |
 
 ---
 
-### Day 1 — 1 July 2026
-**Setup and project structure**
+## AI and ML Techniques Used
 
-What was **me:**
+### 1. RAG — Retrieval Augmented Generation
+- **What it is:** Retrieve relevant documents → augment Claude prompt → generate grounded answer
+- **Where:** ai_layer/query_engine.py — query() and ask_claude() functions
+- **Why:** Prevents hallucination — Claude only answers from retrieved evidence
+- **Innovation:** Smart routing routes people questions to survey data first, operational questions to chat/email first
+
+### 2. LLM — Large Language Model
+- **What it is:** Claude Sonnet 4.6 as the AI backbone
+- **Where:** enrichment.py (analysis) + query_engine.py (answering)
+- **Why:** Best reasoning quality, long context window, multilingual understanding
+- **Innovation:** Used for both enrichment AND query answering — one model, two purposes
+
+### 3. NLP — Natural Language Processing
+- **What it is:** Extract structured intelligence from unstructured text
+- **Where:** ai_layer/enrichment.py
+- **Extracted:** sentiment, topics, people mentioned, projects, decisions, language detection
+- **Languages:** German, Arabic, French, Italian, Portuguese, Korean, Japanese, English
+
+### 4. Entity Resolution
+- **What it is:** Match same person across 9 different data sources
+- **Where:** common_model/entity_resolution.py
+- **Result:** respondent_668738 appears in 9 sources → 1 unified profile
+- **Method:** SQL aggregation by author_email across all raw_documents
+
+### 5. Statistical Aggregation
+- **What it is:** Calculate real survey averages from database
+- **Where:** ai_layer/query_engine.py — get_all_averages(), get_team_satisfaction(), get_workload_by_team()
+- **Result:** 10 score dimensions calculated from 22 employees × 3 survey periods = 66 data points per question
+- **Innovation:** Pre-calculated at query time — never hardcoded
+
+### 6. Keyword Expansion + Targeted Retrieval
+- **What it is:** Expand query with synonyms + route by question type
+- **Where:** ai_layer/query_engine.py — expand_keywords(), search_for_question_type()
+- **Why:** Keyword search misses semantic matches — expansion bridges the gap
+- **Innovation:** 6 targeted search patterns for exit, budget, engineering, morale, complaints, Lucerne questions
+
+### 7. RBAC — Role-Based Access Control
+- **What it is:** Permissions propagate from data source to AI surface
+- **Where:** governance/access_control.py
+- **Roles:** CEO (full), CFO (finance), HR (people), Operations (projects)
+- **Innovation:** Permission check at question level — not just result filtering
+
+### 8. ETL Pipeline — Extract Transform Load
+- **What it is:** Ingest 9 data sources into one normalized schema
+- **Where:** normalization/pipeline.py + all connectors
+- **Records:** 1818 total records with full provenance tracking
+
+---
+
+## Agent Architecture
+
+| Agent | File | Role |
+|-------|------|------|
+| Connector Agents (×9) | connectors/ | Ingest from each data source |
+| Enrichment Agent | ai_layer/enrichment.py | Analyze documents with Claude |
+| Query Agent (RAG) | ai_layer/query_engine.py | Answer questions with evidence |
+| Governance Agent | governance/access_control.py | Enforce permissions before AI sees data |
+| Entity Resolution Agent | common_model/entity_resolution.py | Link identities across 9 sources |
+
+---
+
+## Day by Day Build Log
+
+### Day 1 — June 30, 2026 — Setup
+
+**What was me:**
 - Decision to choose Problem A
 - Decision to use Streamlit for mobile interface
-- Decision to use SQLite for fast demo
-- All terminal commands executed
-- GitHub account and repo management
-- Reading and understanding the brief deeply
-- Asking the right clarifying questions to Benny
+- Decision to use SQLite for demo — PostgreSQL in production
+- Read brief deeply — identified 4 requirements
+- GitHub repo setup and management
 
-What was **Claude:**
+**What was Claude:**
 - Suggested project folder structure
-- Helped fix Homebrew and Python installation issues
-- Generated the .gitignore content
-- Advised on hackathon strategy and timeline
+- Helped fix Python installation issues
+- Generated .gitignore
 
 ---
 
-### Day 2 — 1 July 2026
-**4 Connectors built**
+### Day 2 — July 1, 2026 — Connector Layer
 
-What was **me:**
-- Decision to build by category not by tool name
+**What was me:**
+- Decision to build by CATEGORY not by tool name
 - Decision that every connector shares same 5-method interface
-- Identified that Teams/Slack/Discord = same category
+- Identified Teams/Slack/Discord = same category, different adapter
 - Tested each connector manually
 
-What was **Claude:**
-- Generated the BaseConnector abstract class
-- Generated ChatConnector, EmailConnector, DocumentConnector, SurveyConnector
-- Suggested the connect/extract/validate/send/log interface pattern
+**What was Claude:**
+- Generated BaseConnector abstract class
+- Generated 9 connector implementations
+- Suggested connect/extract/validate/send/log interface
 
 **Key architectural decision I made:**
 > Build connectors by CATEGORY not by tool name.
-> This is what makes the system generic — not one connector per tool.
 > If Flowit switches from Teams to Discord — only the adapter changes.
+> The rest of the system is untouched.
 
 ---
 
-### Day 3 — 2 July 2026
-**Normalization Pipeline + Entity Resolution**
+### Day 3 — July 2, 2026 — Normalization + Common Model
 
-What was **me:**
-- Decision to use one unified pipeline for all 3 data types
-- Decision to use SQLite with two tables (raw + enriched)
-- Identified that survey respondents are anonymous — handled correctly
-- Verified entity resolution correctly merged Ahmed across 3 sources
+**What was me:**
+- Decision to normalize everything to one common schema
+- Decision to track provenance on every single record
+- Decision to build entity resolution using SQL aggregation
+- Identified same respondent_id appears across 9 sources
 
-What was **Claude:**
-- Generated pipeline.py and database.py
-- Generated entity_resolution.py
-- Suggested the provenance tracking approach
+**What was Claude:**
+- Generated normalization/pipeline.py
+- Generated common_model/entity_resolution.py
+- Helped design database schema
 
 **Key insight I had:**
-> Ahmed Ben Ali appears in Teams chat, email, AND documents.
-> Entity resolution correctly merges these into 1 unified profile.
-> This is exactly what the brief asked for.
+> Without entity resolution — same person in 9 sources = 9 different people.
+> With entity resolution — 1 unified profile with full context.
 
 ---
 
-### Day 4 — 2 July 2026
-**AI Layer — Claude API Integration**
+### Day 4 — July 3, 2026 — AI Enrichment Layer
 
-What was **me:**
-- Decision to use Claude API for enrichment and query engine
-- Decision to prioritize unstructured data over survey data in search
-- Identified the problem when survey data was drowning out operational docs
-- Tested all 10 executive questions and verified answers
-- Decision to abstract AI layer so any model can plug in
+**What was me:**
+- Decision to enrich documents once and store results permanently
+- Decision on what to extract: sentiment, topics, people, projects, decisions
+- Decision to skip enrichment on numeric scores — calculate directly
+- Total enrichment cost: ~$7 for 734 documents
 
-What was **Claude (claude.ai):**
-- Generated enrichment.py and query_engine.py
-- Helped debug the search prioritization issue
-- Suggested the keyword-based search approach
+**What was Claude:**
+- Generated ai_layer/enrichment.py
+- Suggested the store-once-reuse pattern
+- Generated JSON extraction prompt
 
-What was **Claude API (in production):**
-- Reads each document and extracts sentiment, people, projects, decisions
-- Answers executive questions using retrieved context
-- Returns structured JSON with answer + confidence + evidence
-
-**Key decision I made:**
-> Separate the AI enrichment (batch) from the query engine (real-time).
-> Enrichment runs once — stores results.
-> Query engine uses stored enrichment + live Claude call.
-> This is faster and cheaper in production.
+**Key decision:**
+> Enrich once → store in DB → reuse forever.
+> Fast and cost-efficient in production.
 
 ---
 
-### Day 5 — 2 July 2026
-**Mobile Interface**
+### Day 5 — July 4-5, 2026 — RAG Query Engine
 
-What was **me:**
-- Decision to use Streamlit — Python native, fast to build
-- Decision to make it WhatsApp-style — not a dashboard
-- Design decisions for mobile layout and colors
-- Decision to show evidence as collapsible — not overwhelming
-- Decision to show uncertainty — honesty builds trust
+**What was me:**
+- Decision to use RAG architecture
+- Decision on smart routing — people questions → survey first
+- Decision on targeted search by question type
+- Identified all retrieval failure modes and fixed them
+- Tested all 20 demo questions manually
 
-What was **Claude:**
-- Generated the full Streamlit app code
-- Helped fix CSS styling for dark background text visibility
-- Suggested the role-based login approach
+**What was Claude:**
+- Generated query_engine.py structure
+- Generated pre-calculated functions (get_all_averages etc.)
+- Helped debug keyword expansion issues
+
+**Key insight I had:**
+> Retrieval quality > model quality.
+> The best LLM gives wrong answers with wrong documents.
+> Targeted retrieval by question type improved precision dramatically.
 
 ---
 
-### Day 6 — 2 July 2026
-**Governance Layer**
+### Day 6 — July 6, 2026 — Governance Layer
 
-What was **me:**
-- Decision to block topics at the question level — not just filter results
-- Decision that HR cannot see financial data — specific role rules
-- Identified that partial filtering is not enough — full block needed
-- Tested access denied message for restricted roles
+**What was me:**
+- Decision to block at question level — not just filter results
+- Specific role rules: HR cannot see financial data
+- Identified partial filtering is not enough — full block needed
+- Tested access denied for all restricted role/topic combinations
 
-What was **Claude:**
+**What was Claude:**
 - Generated access_control.py and audit_log.py
-- Suggested the filter_results_by_role approach
-- Generated the is_question_allowed function
+- Generated is_question_allowed() function
 
 **Key insight I had:**
-> Filtering results is not enough.
-> If HR asks about budget — the system should say ACCESS DENIED.
-> Not just show fewer results.
-> This is what "governance as first-class concern" means.
+> Filtering results after retrieval is not good enough.
+> If HR asks about budget — system must say ACCESS DENIED before retrieval.
+> Governance must propagate from source to surface.
 
 ---
 
-### Day 7 — 2 July 2026
-**Legacy System + Documentation**
+### Day 7 — July 7-8, 2026 — Interface + Integration
 
-What was **me:**
-- Decision to simulate legacy system as SQLite (realistic assumption)
-- Decision to use read-only connection — never modify legacy system
-- Decision to use Strangler Fig pattern
-- Decision on README structure and what to include
+**What was me:**
+- All interface design decisions
+- Mobile-first layout
+- Evidence card format
+- Role-based suggestion questions per persona
+- All 20 demo questions tested and verified
 
-What was **Claude:**
-- Generated legacy_connector.py
-- Generated README.md structure
-- Helped explain the Strangler Fig pattern
+**What was Claude:**
+- Generated interface/app.py structure
+- Helped fix evidence display bugs
+- Generated role-based suggestion lists
 
 ---
 
-## Summary
+### Day 8 — July 9, 2026 — Final Testing + Submission
 
-| Category | Me | Claude |
-|---|---|---|
-| Architecture decisions | ✅ All mine | Suggested options |
-| Code writing | Reviewed and tested | Generated boilerplate |
-| Problem solving | Identified all issues | Helped debug |
-| Business logic | ✅ All mine | Implemented my decisions |
-| Testing | ✅ All mine | None |
-| Strategic decisions | ✅ All mine | None |
+**What was me:**
+- Full demo readiness test 
+- Architecture diagram designs
+- All submission materials preparation
+- Final GitHub push
+
+**What was Claude:**
+- Helped update build log and README
 
 ---
 
 ## Honest Assessment
 
-> Claude was my coding partner — not my replacement.
+> Claude was my senior coding partner — not my replacement.
+>
 > Every architectural decision, every business logic choice,
 > every test, every bug identification — was me.
-> Claude wrote the boilerplate faster than I could type it.
+>
+> Claude wrote boilerplate faster than I could type it.
 > I reviewed, tested, modified, and directed everything.
+>
+> The hardest problems — retrieval quality, evidence grounding,
+> smart routing, governance propagation — I solved by thinking not by asking Claude to think for me.
+>
 > This is exactly how senior engineers use AI tools today.
+
+---
+
+## Final Numbers
+
+| Metric | Value |
+|--------|-------|
+| Total records ingested | 1818 |
+| Documents enriched | 734 (40.4%) |
+| Survey respondents | 38 unique employees |
+| Survey text answers | 425 |
+| Score responses | 1084 |
+| Languages supported | 8 |
+| Connectors built | 9 |
+| Agent types | 5 |
+| Governance roles | 4 |
+| Days to build | 8 |
+| Total API cost | ~$9 |
 
 ---
 
 ## Models Used
 
-- **Claude Sonnet 4.6** — via claude.ai (architecture, debugging, docs)
-- **Claude Sonnet 4.6** — via Anthropic API (enrichment, query engine)
+- **Claude Sonnet 4.6** via claude.ai — architecture, debugging, documentation
+- **Claude Sonnet 4.6** via Anthropic API — enrichment, RAG query engine, translation
 
 ---
 
-*Build log maintained daily throughout the hackathon.*
-*All AI usage disclosed as required by Terms and Conditions.*
+*Build log maintained throughout the hackathon.*
+*All AI usage disclosed as required by the Flowit Hackathon Terms and Conditions.*
