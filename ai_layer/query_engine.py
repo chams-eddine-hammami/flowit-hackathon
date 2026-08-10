@@ -516,15 +516,21 @@ def get_all_averages() -> str:
             AND content LIKE '%Score:%'
             AND author_email LIKE 'respondent_6687%'
             AND LOWER(content) LIKE ?
-        """, (f"%{keyword}%",))
+            """, (f"%{keyword}%",))
+            
 
         rows = cursor.fetchall()
         scores = []
         unique_respondents = set()
         for row in rows:
             try:
-                score_part = row[0].split('Score:')[1]\
-                    .split('out of')[0].strip()
+                score_text = row[0].split('Score:')[1].strip()
+                if 'out of' in score_text:
+                    score_part = score_text.split('out of')[0].strip()
+                elif '/' in score_text:
+                    score_part = score_text.split('/')[0].strip()
+                else:
+                     score_part = score_text.split()[0].strip()
                 score = float(score_part)
                 if 1 <= score <= 7:
                     scores.append(score)
